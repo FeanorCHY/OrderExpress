@@ -47,10 +47,10 @@
 	__webpack_require__(1);
 	let $ = __webpack_require__(5);
 	window.$ = window.jQuery = $;
-	window.AdminLTEOptions = __webpack_require__(11);
-	let _ = __webpack_require__(6);
-	let View = __webpack_require__(7);
-	let Model = __webpack_require__(10);
+	window.AdminLTEOptions = __webpack_require__(6);
+	let _ = __webpack_require__(7);
+	let View = __webpack_require__(8);
+	let Model = __webpack_require__(11);
 	let utils = __webpack_require__(12);
 
 	$(document).ready(function () {
@@ -58,8 +58,17 @@
 	});
 
 	$('#register-button').on("click", function () {
-	    let user = new Model.User();
-	    user.save();
+	    let customer = new Model.Customer();
+	    customer.save(null, {
+	        success: function (mod, res) {
+	            console.log(res);
+	        },
+	        error: function (mod, res) {
+	            if (res.status === 409) {
+	                console.log("email taken.");
+	            }
+	        }
+	    });
 	    // loginCheck(user);
 	});
 
@@ -428,6 +437,112 @@
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	var AdminLTE_Options = {
+	    //Add slimscroll to navbar menus
+	    //This requires you to load the slimscroll plugin
+	    //in every page before app.js
+	    navbarMenuSlimscroll: true,
+	    navbarMenuSlimscrollWidth: "3px", //The width of the scroll bar
+	    navbarMenuHeight: "200px", //The height of the inner menu
+	    //General animation speed for JS animated elements such as box collapse/expand and
+	    //sidebar treeview slide up/down. This options accepts an integer as milliseconds,
+	    //'fast', 'normal', or 'slow'
+	    animationSpeed: 500,
+	    //Sidebar push menu toggle button selector
+	    sidebarToggleSelector: "[data-toggle='offcanvas']",
+	    //Activate sidebar push menu
+	    sidebarPushMenu: true,
+	    //Activate sidebar slimscroll if the fixed layout is set (requires SlimScroll Plugin)
+	    sidebarSlimScroll: true,
+	    //Enable sidebar expand on hover effect for sidebar mini
+	    //This option is forced to true if both the fixed layout and sidebar mini
+	    //are used together
+	    sidebarExpandOnHover: false,
+	    //BoxRefresh Plugin
+	    enableBoxRefresh: true,
+	    //Bootstrap.js tooltip
+	    enableBSToppltip: true,
+	    BSTooltipSelector: "[data-toggle='tooltip']",
+	    //Enable Fast Click. Fastclick.js creates a more
+	    //native touch experience with touch devices. If you
+	    //choose to enable the plugin, make sure you load the script
+	    //before AdminLTE's app.js
+	    enableFastclick: true,
+	    //Control Sidebar Options
+	    enableControlSidebar: true,
+	    controlSidebarOptions: {
+	        //Which button should trigger the open/close event
+	        toggleBtnSelector: "[data-toggle='control-sidebar']",
+	        //The sidebar selector
+	        selector: ".control-sidebar",
+	        //Enable slide over content
+	        slide: true
+	    },
+	    //Box Widget Plugin. Enable this plugin
+	    //to allow boxes to be collapsed and/or removed
+	    enableBoxWidget: true,
+	    //Box Widget plugin options
+	    boxWidgetOptions: {
+	        boxWidgetIcons: {
+	            //Collapse icon
+	            collapse: 'fa-minus',
+	            //Open icon
+	            open: 'fa-plus',
+	            //Remove icon
+	            remove: 'fa-times'
+	        },
+	        boxWidgetSelectors: {
+	            //Remove button selector
+	            remove: '[data-widget="remove"]',
+	            //Collapse button selector
+	            collapse: '[data-widget="collapse"]'
+	        }
+	    },
+	    //Direct Chat plugin options
+	    directChat: {
+	        //Enable direct chat by default
+	        enable: true,
+	        //The button to open and close the chat contacts pane
+	        contactToggleSelector: '[data-widget="chat-pane-toggle"]'
+	    },
+	    //Define the set of colors to use globally around the website
+	    colors: {
+	        lightBlue: "#3c8dbc",
+	        red: "#f56954",
+	        green: "#00a65a",
+	        aqua: "#00c0ef",
+	        yellow: "#f39c12",
+	        blue: "#0073b7",
+	        navy: "#001F3F",
+	        teal: "#39CCCC",
+	        olive: "#3D9970",
+	        lime: "#01FF70",
+	        orange: "#FF851B",
+	        fuchsia: "#F012BE",
+	        purple: "#8E24AA",
+	        maroon: "#D81B60",
+	        black: "#222222",
+	        gray: "#d2d6de"
+	    },
+	    //The standard screen sizes that bootstrap uses.
+	    //If you change these in the variables.less file, change
+	    //them here too.
+	    screenSizes: {
+	        xs: 480,
+	        sm: 768,
+	        md: 992,
+	        lg: 1200
+	    }
+	};
+
+	module.exports = {
+	    AdminLTE_Options: AdminLTE_Options
+	};
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -1981,17 +2096,17 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	let $ = __webpack_require__(5);
-	let _ = __webpack_require__(6);
-	let Backbone = __webpack_require__(8);
+	let _ = __webpack_require__(7);
+	let Backbone = __webpack_require__(9);
 	Backbone.$ = $;
-	let _vars = __webpack_require__(9);
+	let _vars = __webpack_require__(10);
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {//     Backbone.js 1.3.3
@@ -2010,7 +2125,7 @@
 
 	  // Set up Backbone appropriately for the environment. Start with AMD.
 	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(6), __webpack_require__(5), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(7), __webpack_require__(5), exports], __WEBPACK_AMD_DEFINE_RESULT__ = function(_, $, exports) {
 	      // Export global even in AMD case in case this script is loaded with
 	      // others that may still expect a global Backbone.
 	      root.Backbone = factory(root, exports, _, $);
@@ -3918,155 +4033,60 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	module.exports = {}
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	let $ = __webpack_require__(5);
-	let _ = __webpack_require__(6);
-	let Backbone = __webpack_require__(8);
+	let _ = __webpack_require__(7);
+	let Backbone = __webpack_require__(9);
 	Backbone.$ = $;
 	let utils = __webpack_require__(12);
 
-	let User = Backbone.Model.extend({
-	                                     url: "/register",
-	                                     defaults: {
-	                                         cus_id: "",
-	                                         cus_name: "user_" + (new Date()).getTime(),
-	                                         cus_password: (new Date()).getTime(),
-	                                         cus_gender: "male",
-	                                         cus_age: 0,
-	                                         cus_email: (new Date()).getTime().concat("@test.com"),
-	                                         cus_address: "135 N Bellefield Ave, Unit 403, Pittsburgh PA  15213",
-	                                         cus_phone: "4124121212"
-	                                     },
-	                                     validate: function () {
-	                                         if (!utils.emailValidate(this.cus_email)) {
-	                                             return "invalid email.";
-	                                         } else if (!utils.ageValidate(this.cus_age)) {
-	                                             return "invalid age.";
-	                                         } else if (!utils.phoneValidate(this.cus_phone)) {
-	                                             return "invalid phone number.";
-	                                         } else if (!utils.genderValidate(this.cus_gender)) {
-	                                             return "invalid gender.";
+	let Customer = Backbone.Model.extend({
+	                                         url: "register",
+	                                         defaults: {
+	                                             cus_name: "user_" + (new Date()).getTime(),
+	                                             cus_password: (new Date()).getTime(),
+	                                             cus_gender: "male",
+	                                             cus_age: 1,
+	                                             cus_email: (new Date()).getTime() + "@test.com",
+	                                             cus_address: "135 N Bellefield Ave, Unit 403, Pittsburgh PA 15213",
+	                                             cus_phone: "4124121212"
+	                                         },
+	                                         initialize: function () {
+	                                             // this.set("cus_email", "asd11@qq.com");
+	                                         },
+	                                         validationError: "",
+	                                         validate: function () {
+	                                             let errMsg = "";
+	                                             if (!utils.emailValidate(this.attributes.cus_email)) {
+	                                                 errMsg = "invalid email.";
+	                                             } else if (!utils.ageValidate(
+	                                                     this.attributes.cus_age)) {
+	                                                 errMsg = "invalid age.";
+	                                             } else if (!utils.phoneValidate(
+	                                                     this.attributes.cus_phone)) {
+	                                                 errMsg = "invalid phone number.";
+	                                             } else if (!utils.genderValidate(
+	                                                     this.attributes.cus_gender)) {
+	                                                 errMsg = "invalid gender.";
+	                                             }
+	                                             if (errMsg !== "") {
+	                                                 this.validationError = errMsg;
+	                                                 return errMsg;
+	                                             }
 	                                         }
 	                                     }
-	                                 }
 	);
 
 	module.exports = {
-	    User: User
-	};
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	var AdminLTE_Options = {
-	    //Add slimscroll to navbar menus
-	    //This requires you to load the slimscroll plugin
-	    //in every page before app.js
-	    navbarMenuSlimscroll: true,
-	    navbarMenuSlimscrollWidth: "3px", //The width of the scroll bar
-	    navbarMenuHeight: "200px", //The height of the inner menu
-	    //General animation speed for JS animated elements such as box collapse/expand and
-	    //sidebar treeview slide up/down. This options accepts an integer as milliseconds,
-	    //'fast', 'normal', or 'slow'
-	    animationSpeed: 500,
-	    //Sidebar push menu toggle button selector
-	    sidebarToggleSelector: "[data-toggle='offcanvas']",
-	    //Activate sidebar push menu
-	    sidebarPushMenu: true,
-	    //Activate sidebar slimscroll if the fixed layout is set (requires SlimScroll Plugin)
-	    sidebarSlimScroll: true,
-	    //Enable sidebar expand on hover effect for sidebar mini
-	    //This option is forced to true if both the fixed layout and sidebar mini
-	    //are used together
-	    sidebarExpandOnHover: false,
-	    //BoxRefresh Plugin
-	    enableBoxRefresh: true,
-	    //Bootstrap.js tooltip
-	    enableBSToppltip: true,
-	    BSTooltipSelector: "[data-toggle='tooltip']",
-	    //Enable Fast Click. Fastclick.js creates a more
-	    //native touch experience with touch devices. If you
-	    //choose to enable the plugin, make sure you load the script
-	    //before AdminLTE's app.js
-	    enableFastclick: true,
-	    //Control Sidebar Options
-	    enableControlSidebar: true,
-	    controlSidebarOptions: {
-	        //Which button should trigger the open/close event
-	        toggleBtnSelector: "[data-toggle='control-sidebar']",
-	        //The sidebar selector
-	        selector: ".control-sidebar",
-	        //Enable slide over content
-	        slide: true
-	    },
-	    //Box Widget Plugin. Enable this plugin
-	    //to allow boxes to be collapsed and/or removed
-	    enableBoxWidget: true,
-	    //Box Widget plugin options
-	    boxWidgetOptions: {
-	        boxWidgetIcons: {
-	            //Collapse icon
-	            collapse: 'fa-minus',
-	            //Open icon
-	            open: 'fa-plus',
-	            //Remove icon
-	            remove: 'fa-times'
-	        },
-	        boxWidgetSelectors: {
-	            //Remove button selector
-	            remove: '[data-widget="remove"]',
-	            //Collapse button selector
-	            collapse: '[data-widget="collapse"]'
-	        }
-	    },
-	    //Direct Chat plugin options
-	    directChat: {
-	        //Enable direct chat by default
-	        enable: true,
-	        //The button to open and close the chat contacts pane
-	        contactToggleSelector: '[data-widget="chat-pane-toggle"]'
-	    },
-	    //Define the set of colors to use globally around the website
-	    colors: {
-	        lightBlue: "#3c8dbc",
-	        red: "#f56954",
-	        green: "#00a65a",
-	        aqua: "#00c0ef",
-	        yellow: "#f39c12",
-	        blue: "#0073b7",
-	        navy: "#001F3F",
-	        teal: "#39CCCC",
-	        olive: "#3D9970",
-	        lime: "#01FF70",
-	        orange: "#FF851B",
-	        fuchsia: "#F012BE",
-	        purple: "#8E24AA",
-	        maroon: "#D81B60",
-	        black: "#222222",
-	        gray: "#d2d6de"
-	    },
-	    //The standard screen sizes that bootstrap uses.
-	    //If you change these in the variables.less file, change
-	    //them here too.
-	    screenSizes: {
-	        xs: 480,
-	        sm: 768,
-	        md: 992,
-	        lg: 1200
-	    }
-	};
-
-	module.exports = {
-	    AdminLTE_Options: AdminLTE_Options
+	    Customer: Customer
 	};
 
 /***/ },
@@ -4075,7 +4095,7 @@
 
 	let utils = {
 	    emailValidate: function (email) {
-	        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	        let re = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/;
 	        return re.test(email);
 	    },
 	    ageValidate: function (age) {

@@ -4,16 +4,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.util.List;
 
+import edu.orderexp.bean.Dish;
 import edu.orderexp.util.DBConnector;
 
 
-public class DishDao {
-	private Connection connection;
+public class DishDao implements Dao<Dish>{
+	private DBConnector driver;
 	String query = "";
 	
-	public DishDao() {
-		connection = DBConnector.getConnection();
+	public DishDao(DBConnector driver) {
+		this.driver = driver;
 		System.out.println("----------- DishDao Connection -----------");
 	}
 	
@@ -22,8 +24,8 @@ public class DishDao {
 	 * @return automate generated customer_id
 	 */
 	public int insertDish(String name, String description, String pic_path, int restId, 
-		float price) {
-
+		float price) throws SQLException {
+		Connection connection = driver.connect();
 		query = "INSERT INTO OrderExpress.dish(dish_name, description, pic_path, rest_id, price)" +
 		"value(?, ?, ?, ?, ?)";
 
@@ -50,6 +52,38 @@ public class DishDao {
 			System.out.println("Dish insertion failed!!!");
 			e.printStackTrace();
 			return -1;
+		}finally {
+			connection.close();
 		}
+	}
+
+	@Override
+	public List<Dish> fetchAll() {
+		return null;
+	}
+
+	@Override
+	public Dish fetchElementById(int id) {
+		return null;
+	}
+
+	@Override
+	public Dish add(Dish dish) throws SQLException {
+		return null;
+	}
+
+	@Override
+	public boolean exist(Dish dish) {
+		return false;
+	}
+
+	@Override
+	public boolean updateById(int id) throws SQLException {
+		return false;
+	}
+
+	@Override
+	public boolean deleteById(int id) throws SQLException {
+		return false;
 	}
 }

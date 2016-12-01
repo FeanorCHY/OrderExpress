@@ -13,135 +13,108 @@ import java.util.List;
 
 public class Customer {
 		
-	private int id;
-	private String name;
-	private String password;
-	private String gender;
-	private int age;
-	private String email;
-	private String address;
-	private String phone;
+	private int cus_id;
+	private String cus_name;
+	private String cus_password;
+	private String cus_gender;
+	private int cus_age;
+	private String cus_email;
+	private String cus_address;
+	private String cus_phone;
 	private List<Dish> favors;
 	
 	public Customer() {
 		favors = new ArrayList<Dish>();
 	}
-	
-	public Customer(String id, String name, String password, String gender, int age, 
-			String email, String address, String phone) {
-		
-	}
-	
-	/*
-	 * Get and Set Customer ID
-	 */
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
+
+	public Customer(String cus_name, String cus_password, String cus_gender, int cus_age, String cus_email, String cus_address, String cus_phone) {
+		this.cus_name = cus_name;
+		this.cus_password = cus_password;
+		this.cus_gender = cus_gender;
+		this.cus_age = cus_age;
+		this.cus_email = cus_email;
+		this.cus_address = cus_address;
+		this.cus_phone = cus_phone;
 	}
 
-	/*
-	 * Get and Set Customer Name
-	 */
-	public String getName() {
-		return name;
+
+	public Customer(int cus_id, String cus_name, String cus_password, String cus_gender, int cus_age, String cus_email, String cus_address, String cus_phone) {
+		this.cus_id = cus_id;
+		this.cus_name = cus_name;
+		this.cus_password = cus_password;
+		this.cus_gender = cus_gender;
+		this.cus_age = cus_age;
+		this.cus_email = cus_email;
+		this.cus_address = cus_address;
+		this.cus_phone = cus_phone;
 	}
-	public void setName(String name) {
-		this.name = name;
+
+	public int getCus_id() {
+		return cus_id;
 	}
-	
-	/*
-	 * Get and Set Customer Password
-	 */
-	public String getPassword() {
-		return password;
+
+	public void setCus_id(int cus_id) {
+		this.cus_id = cus_id;
 	}
-	public void setPassword(String password) {
-		this.password = password;
+
+	public String getCus_name() {
+		return cus_name;
 	}
-	
-	/*
-	 * Get and Set Customer Gender
-	 */
-	public String getGender() {
-		return gender;
+
+	public void setCus_name(String cus_name) {
+		this.cus_name = cus_name;
 	}
-	public void setGender(String gender) {
-		this.gender = gender;
+
+	public String getCus_password() {
+		return cus_password;
 	}
-	
-	/*
-	 * Get and Set Customer Age
-	 */
-	public int getAge() {
-		return age;
+
+	public void setCus_password(String cus_password) {
+		this.cus_password = cus_password;
 	}
-	public void setAge(int age) {
-		this.age = age;
+
+	public String getCus_gender() {
+		return cus_gender;
 	}
-	
-	/*
-	 * Get and Set Customer Email
-	 */
-	public String getEmail() {
-		return email;
+
+	public void setCus_gender(String cus_gender) {
+		this.cus_gender = cus_gender;
 	}
-	public void setEmail(String email) {
-		this.email = email;
+
+	public int getCus_age() {
+		return cus_age;
 	}
-	
-	/*
-	 * Get and Set Customer Address
-	 */
-	public String getAddress() {
-		return address;
+
+	public void setCus_age(int cus_age) {
+		this.cus_age = cus_age;
 	}
-	public void setAddress(String address) {
-		this.address = address;
+
+	public String getCus_email() {
+		return cus_email;
 	}
-	
-	/*
-	 * Get and Set Customer Phone
-	 */
-	public String getPhone() {
-		return phone;
+
+	public void setCus_email(String cus_email) {
+		this.cus_email = cus_email;
 	}
-	public void setPhone(String phone) {
-		this.phone = phone;
+
+	public String getCus_address() {
+		return cus_address;
 	}
-	
-	/*
-	 * Add favorite dishes
-	 */
-	public List<Dish> addFavDish(Dish dish) {
-		if(!favors.contains(dish)) this.favors.add(dish);
-		return this.favors;
+
+	public void setCus_address(String cus_address) {
+		this.cus_address = cus_address;
 	}
-	
+
+	public String getCus_phone() {
+		return cus_phone;
+	}
+
+	public void setCus_phone(String cus_phone) {
+		this.cus_phone = cus_phone;
+	}
+
 	public List<Dish> getFavDishes() {
 		return this.favors;
-	}
-	
-	public int addCustomer(String name, String password, String gender, int age, 
-			String emailAddress, String address, String phone) {
-		this.name = name;
-		this.password = password;
-		this.gender = gender;
-		this.age = age;
-		this.email = emailAddress;
-		this.address = address;
-		this.phone = phone;
-		
-		CustomerDao cd = new CustomerDao();
-		
-		if(cd.notExist(email)) {
-			this.id = cd.insertCustomer(name, password, gender, age, email, address, phone);
-			return id;
-		} else {
-			return -1;
-		}
 	}
 		
 }

@@ -12,7 +12,7 @@ public class TransactionDishDao {
 	String query = "";
 	
 	public TransactionDishDao() {
-		connection = DBConnector.getConnection();
+		connection = new DBConnector().connect();//quick fix
 		System.out.println("----------- TransactionDishDao Connection -----------");
 	}
 	

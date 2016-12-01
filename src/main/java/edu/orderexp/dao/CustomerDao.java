@@ -2,142 +2,151 @@ package edu.orderexp.dao;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.sql.PreparedStatement;
-
+import java.util.List;
 
 import edu.orderexp.bean.Customer;
 import edu.orderexp.util.DBConnector;
 
 
-public class CustomerDao {
-	private static Connection connection;
-	String query = "";
-	PreparedStatement ps;
-	ResultSet rs;
-	
-	public CustomerDao() {
-		connection = DBConnector.getConnection();
-		System.out.println("----------- CustomerDao Connection -----------");
-	}
-	
-	/**
-	 * Insert record to TABLE customer
-	 * @return automate generated customer_id
-	 */
-	public int insertCustomer(String name, String password, String gender, int age, 
-		String emailAddress, String address, String phone) {
+public class CustomerDao implements Dao<Customer> {
+    private DBConnector driver;
 
-		query = "INSERT INTO OrderExpress.Customer(cus_name, cus_password, cus_gender, cus_age, cus_email, cus_address, cus_phone)" +
-		"value(?, ?, ?, ?, ?, ?, ?)";
+    public CustomerDao(DBConnector driver) {
+        this.driver = driver;
+    }
 
-		try {
-			ps = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
-			ps.setString(1, name);
-			ps.setString(2, password);
-			ps.setString(3, gender);
-			ps.setInt(4, age);
-			ps.setString(5, emailAddress);
-			ps.setString(6, address);
-			ps.setString(7, phone);
+    @Override
+    public List<Customer> fetchAll() {
+        return null;
+    }
 
-			ps.executeUpdate();
+    @Override
+    public Customer fetchElementById(int id) {
+        return null;
+    }
 
-			rs = ps.getGeneratedKeys();
+    @Override
+    public Customer add(Customer c) throws SQLException {
+        Connection conn = driver.connect();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String query = "INSERT INTO Customer(cus_name, cus_password, cus_gender, cus_age, cus_email, cus_address, cus_phone) " +
+                "VALUE(?, ?, ?, ?, ?, ?, ?)";
 
-			if(rs.next()) {
-				int autoKey = rs.getInt(1);
-				return autoKey;
-			} else {
-				return -1;
-			}
+        try {
+            ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, c.getCus_name());
+            ps.setString(2, c.getCus_password());
+            ps.setString(3, c.getCus_gender());
+            ps.setInt(4, c.getCus_age());
+            ps.setString(5, c.getCus_email());
+            ps.setString(6, c.getCus_address());
+            ps.setString(7, c.getCus_phone());
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                c.setCus_id(rs.getInt(1));
+                System.out.println("user \"" + c.getCus_name() + "\" added, id = " + c.getCus_id() + ". ");
+                return c;
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            System.out.println("Customer insertion failed!!!");
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
 
-		} catch (SQLException e) {
-			System.out.println("Customer insertion failed!!!");
-			e.printStackTrace();
-			return -1;
-		} finally {
-			if(rs != null) {
-				try { rs.close(); } catch (SQLException e) {
-					System.out.println("ResultSet failed to close! ");
-				}
-			}
-			if(ps != null) {
-				try { ps.close(); } catch (SQLException e2) {
-					System.out.println("PreparedStatement failed to close! ");
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Get customer by email
-	 * @param email
-	 * @return Customer 
-	 */
-	public Customer getCustomerWithEmail(String email) {
-		query = "SELECT * FROM OrderExpress.Customer WHERE cus_email=" + email;
-		
-		try {
-			ps = connection.prepareStatement(query);
-			
-			rs = ps.executeQuery();
-			Customer customer = new Customer(rs.getString(1), rs.getString(2), 
-					rs.getString(3), rs.getString(4), rs.getInt(5), rs.getString(6), 
-					rs.getString(7), rs.getString(8));
-			return customer;
-			
-		} catch (SQLException e) {
-			System.out.println("We can't get this customer by email! ");
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public static void authenticate(String userEmail, String password) {
+    @Override
+    public boolean exist(Customer customer) {
+        boolean flag = false;
+        try {
+            if (!customer.getCus_email().equals("")) {
+                flag = existByEmail(customer.getCus_email());
+                System.out.println(flag ? "rejected: email taken." : "passed: valid email.");
+            }
+        } catch (SQLException e) {
+            System.out.println("User existence validation.");
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean updateById(int id) throws SQLException {
+        return false;
+    }
+
+    @Override
+    public boolean deleteById(int id) throws SQLException {
+        return false;
+    }
+
+    public void authenticate(String userEmail, String password) {
+        Connection conn = driver.connect();
         CallableStatement callstatement = null;
         try {
-        	callstatement = connection.prepareCall("call login(?,?,?);");
+            callstatement = conn.prepareCall("CALL login(?,?,?);");
             callstatement.setString(1, "siz16@pitt.edu");
             callstatement.setString(2, "12345567");
             callstatement.registerOutParameter(3, Types.INTEGER);
             callstatement.execute();
             System.out.println(callstatement.getInt(3));
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if(callstatement != null) {
-				try { callstatement.close(); } catch (SQLException e) {
-					System.out.println("Authenticate callable statement failed to close! ");
-				}
-			}
-		}
-	}
-	/**
-	 * @param email
-	 * @return the email exists or not 
-	 */
-	public boolean notExist(String email) {
-		boolean notExist = true;
-		int count = 0;
-		
-		query = "SELECT COUNT(*) as CustomerCount FROM OrderExpress.Customer WHERE cus_email=" + email;
-		
-		try {
-			ps = connection.prepareStatement(query);
-			rs = ps.executeQuery();
-			
-			while(rs.next()) {
-				count = rs.getInt("CustomerCount");
-			}
-			
-			notExist = (count == 0)? true:false;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return notExist;
-	}
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (callstatement != null) {
+                try {
+                    callstatement.close();
+                } catch (SQLException e) {
+                    System.out.println("Authenticate callable statement failed to close! ");
+                }
+            }
+        }
+    }
+
+    /**
+     * @return the email exists or not
+     */
+    private boolean existByEmail(String email) throws SQLException {
+        Connection conn = driver.connect();
+        int count = 0;
+        ResultSet rs = fetchElementByEmail(conn, email);
+        while (rs.next()) {
+            count++;
+        }
+        conn.close();
+        return count != 0;
+    }
+
+    /**
+     * Get customer by email
+     *
+     * @return Customer
+     */
+    public ResultSet fetchElementByEmail(Connection conn, String email) throws SQLException {
+        String query = "SELECT * FROM Customer WHERE cus_email = ?";
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, email);
+        return ps.executeQuery();
+//        System.out.println("We can't get this customer by email! ");
+//        e.printStackTrace();
+//        return null;
+    }
+
 }

@@ -12,7 +12,7 @@ public class FavoriteDao {
 	String query = "";
 	
 	public FavoriteDao() {
-		connection = DBConnector.getConnection();
+		connection = new DBConnector().connect();// quick fix
 		System.out.println("----------- FavoriteDao Connection -----------");
 	}
 	
