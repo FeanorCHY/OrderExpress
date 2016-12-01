@@ -1,13 +1,17 @@
 package edu.orderexp.services;
 
+import org.apache.log4j.Logger;
+
 import edu.orderexp.dao.CustomerDao;
 import edu.orderexp.dao.DaoFactory;
 
 import static spark.Spark.*;
 
 public class HostService {
+    final static Logger logger = Logger.getLogger(HostService.class);
 
 	public static void main(String[] args) {
+
 		
 		port(5000);
 	    staticFileLocation("/public");

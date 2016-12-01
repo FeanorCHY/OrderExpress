@@ -2,6 +2,8 @@ package edu.orderexp.services;
 
 import com.google.gson.Gson;
 
+import org.apache.log4j.Logger;
+
 import java.util.HashMap;
 
 import edu.orderexp.bean.Customer;
@@ -14,7 +16,7 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 
 public class CustomerService {
-
+    final static Logger logger = Logger.getLogger(CustomerService.class);
     private Gson gson = new Gson();
     private Customer customer = new Customer();
     private CustomerDao cd;
@@ -33,7 +35,6 @@ public class CustomerService {
         post("/register", (req, res) -> {
             // http://stackoverflow.com/questions/17742633/how-read-data-sent-by-client-with-spark
             HashMap<String, Object> attributes = new HashMap<>();
-            System.out.println(req.body());
             customer = fromJson(req.body(), Customer.class);
 
             if (cd.exist(customer)) {
@@ -42,7 +43,7 @@ public class CustomerService {
             } else {
                 customer = cd.add(customer);
                 attributes.put("customer", customer);
-                attributes.put("status", "Registration succeeded. Redirecting page...");
+                attributes.put("statusMsg", "Registration succeeded. Redirecting page...");
             }
             return gson.toJson(attributes);
         });

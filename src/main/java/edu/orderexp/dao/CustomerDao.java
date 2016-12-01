@@ -1,5 +1,7 @@
 package edu.orderexp.dao;
 
+import org.apache.log4j.Logger;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +16,7 @@ import edu.orderexp.util.DBConnector;
 
 public class CustomerDao implements Dao<Customer> {
     private DBConnector driver;
+    final static Logger logger = Logger.getLogger(CustomerDao.class);
 
     public CustomerDao(DBConnector driver) {
         this.driver = driver;
@@ -50,14 +53,13 @@ public class CustomerDao implements Dao<Customer> {
             rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 c.setCus_id(rs.getInt(1));
-                System.out.println("user \"" + c.getCus_name() + "\" added, id = " + c.getCus_id() + ". ");
+                logger.info("Customer \"" + c.getCus_name() + "\" added, id = " + c.getCus_id() + ". ");
                 return c;
             } else {
                 return null;
             }
         } catch (SQLException e) {
-            System.out.println("Customer insertion failed!!!");
-            e.printStackTrace();
+            logger.error("Customer insertion failed.", e);
             return null;
         } finally {
             if (rs != null) {
@@ -77,12 +79,11 @@ public class CustomerDao implements Dao<Customer> {
         boolean flag = false;
         try {
             if (!customer.getCus_email().equals("")) {
-                flag = existByEmail(customer.getCus_email());
-                System.out.println(flag ? "rejected: email taken." : "passed: valid email.");
+                flag = emailExist(customer.getCus_email());
+                logger.info(flag ? "Rejected: email taken." : "Passed: valid email.");
             }
         } catch (SQLException e) {
-            System.out.println("User existence validation.");
-            e.printStackTrace();
+            logger.error("Customer existence validation.", e);
         }
         return flag;
     }
@@ -108,7 +109,7 @@ public class CustomerDao implements Dao<Customer> {
             callstatement.execute();
             System.out.println(callstatement.getInt(3));
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         } finally {
             if (callstatement != null) {
                 try {
@@ -123,7 +124,7 @@ public class CustomerDao implements Dao<Customer> {
     /**
      * @return the email exists or not
      */
-    private boolean existByEmail(String email) throws SQLException {
+    private boolean emailExist(String email) throws SQLException {
         Connection conn = driver.connect();
         int count = 0;
         ResultSet rs = fetchElementByEmail(conn, email);

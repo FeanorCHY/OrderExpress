@@ -14,11 +14,11 @@ $(document).ready(function () {
 $('#register-button').on("click", function () {
     let customer = new Model.Customer();
     customer.save(null, {
-        success: function (mod, res) {
+        success: function (mod, res, opts) {
             console.log(res);
         },
-        error: function (mod, res) {
-            if (res.status === 409) {
+        error: function (mod, xhr, opts) {
+            if (xhr.status === 409) {
                 console.log("email taken.");
             }
         }
