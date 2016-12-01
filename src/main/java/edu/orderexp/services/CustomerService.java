@@ -1,14 +1,9 @@
 package edu.orderexp.services;
 
 import static spark.Spark.*;
+import spark.Session;
 
-import java.sql.CallableStatement;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
-
-import org.eclipse.jetty.http.MetaData.Request;
-import org.eclipse.jetty.server.session.JDBCSessionManager.Session;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -58,15 +53,21 @@ public class CustomerService {
 					id = tmp;
 					System.out.println("CustomerID: " + id);
 					
-					//session session = req.session(true);
-					//session.attribute("customer", customer);
-				}
-				
+					Session session = req.session(true);
+					session.attribute("customer", customer);
+					
+					attributes.put("notExist", true);
+					attributes.put("status", "Registration succeeded!");
+				} else {
+					attributes.put("notExist", false);
+					attributes.put("status", "This email has been registered before! ");
+				}	
 			} catch (Exception e) {
 				// TODO: handle exception
 				e.printStackTrace();
 				attributes.put("status", "Server error. Please try again!");
 			}
+			return gson.toJson(attributes);
 		});
 		
 		//login

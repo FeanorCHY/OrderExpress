@@ -6,17 +6,13 @@ package edu.orderexp.bean;
  * 
  */
 
-import org.apache.commons.lang.RandomStringUtils;
-
 import edu.orderexp.dao.CustomerDao;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Customer {
-	
-	private static final int ID_LENGTH = 6; 
-	
+		
 	private int id;
 	private String name;
 	private String password;
