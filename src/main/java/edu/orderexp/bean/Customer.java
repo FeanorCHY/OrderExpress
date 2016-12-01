@@ -8,6 +8,8 @@ package edu.orderexp.bean;
 
 import org.apache.commons.lang.RandomStringUtils;
 
+import edu.orderexp.dao.CustomerDao;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class Customer {
 	
 	private static final int ID_LENGTH = 6; 
 	
-	private String id;
+	private int id;
 	private String name;
 	private String password;
 	private String gender;
@@ -29,14 +31,19 @@ public class Customer {
 		favors = new ArrayList<Dish>();
 	}
 	
+	public Customer(String id, String name, String password, String gender, int age, 
+			String email, String address, String phone) {
+		
+	}
+	
 	/*
 	 * Get and Set Customer ID
 	 */
-	public String getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId() {
-		this.id = "cus_"+RandomStringUtils.randomAlphanumeric(ID_LENGTH);
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	/*
@@ -119,6 +126,26 @@ public class Customer {
 	
 	public List<Dish> getFavDishes() {
 		return this.favors;
+	}
+	
+	public int addCustomer(String name, String password, String gender, int age, 
+			String emailAddress, String address, String phone) {
+		this.name = name;
+		this.password = password;
+		this.gender = gender;
+		this.age = age;
+		this.email = emailAddress;
+		this.address = address;
+		this.phone = phone;
+		
+		CustomerDao cd = new CustomerDao();
+		
+		if(cd.notExist(email)) {
+			this.id = cd.insertCustomer(name, password, gender, age, email, address, phone);
+			return id;
+		} else {
+			return -1;
+		}
 	}
 		
 }
