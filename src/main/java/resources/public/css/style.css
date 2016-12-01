@@ -1,0 +1,112 @@
+
+/*
+ * Page: Login & Register
+ * ----------------------
+ */
+
+.login-logo,
+.register-logo {
+    font-size: 35px;
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 300;
+}
+
+.login-logo a,
+.register-logo a {
+    color: #444;
+}
+
+.login-page,
+.register-page {
+    background-color: #d2d6de;
+}
+
+.login-background {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    min-height: 100%;
+    height: inherit;
+    background-color: #d2d6de;
+    z-index: 2000;
+    /* for IE */
+    filter: alpha(opacity=90);
+    /* CSS3 standard */
+    opacity: 0.9;
+}
+
+.login-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    margin: 0 auto;
+    background: transparent;
+    z-index: 3000;
+}
+
+.login-box {
+    width: 360px;
+    margin: 7% auto;
+    z-index: 3100;
+}
+
+.register-box {
+    width: 360px;
+    margin: 7% auto;
+}
+
+@media (max-width: 768px) {
+    .login-box,
+    .register-box {
+        width: 90%;
+        margin-top: 20px;
+    }
+}
+
+.login-box-body,
+.register-box-body {
+    background: #fff;
+    padding: 20px;
+    border-top: 0;
+    color: #666;
+}
+
+.login-box-body .form-control-feedback,
+.register-box-body .form-control-feedback {
+    color: #777;
+}
+
+.login-box-msg,
+.register-box-msg {
+    margin: 0;
+    text-align: center;
+    padding: 0 20px 20px 20px;
+}
+
+.social-auth-links {
+    margin: 10px 0;
+}
+
+#chk-err {
+    color: red;
+}
+
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+    overflow: hidden;
+}
+
+.clearfix {
+    zoom: 1;
+    /* IE < 8 */
+}
