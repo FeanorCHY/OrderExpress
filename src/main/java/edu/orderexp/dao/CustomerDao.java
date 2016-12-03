@@ -1,22 +1,20 @@
 package edu.orderexp.dao;
 
+import edu.orderexp.bean.Customer;
+import edu.orderexp.util.DBConnector;
 import org.apache.log4j.Logger;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
-
-import edu.orderexp.bean.Customer;
-import edu.orderexp.util.DBConnector;
 
 
 public class CustomerDao implements Dao<Customer> {
-    private DBConnector driver;
     final static Logger logger = Logger.getLogger(CustomerDao.class);
+    private DBConnector driver;
 
     public CustomerDao(DBConnector driver) {
         this.driver = driver;
@@ -37,8 +35,7 @@ public class CustomerDao implements Dao<Customer> {
         Connection conn = driver.connect();
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String query = "INSERT INTO Customer(cus_name, cus_password, cus_gender, cus_age, cus_email, cus_address, cus_phone) " +
-                "VALUE(?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Customer(cus_name, cus_password, cus_gender, cus_age, cus_email, cus_address, cus_phone) " + "VALUE(?, ?, ?, ?, ?, ?, ?)";
 
         try {
             ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -80,7 +77,7 @@ public class CustomerDao implements Dao<Customer> {
         try {
             if (!customer.getCus_email().equals("")) {
                 flag = emailExist(customer.getCus_email());
-                logger.info(flag ? "Rejected: email taken." : "Passed: valid email.");
+                logger.info(flag ? "email exists." : "unregistered email.");
             }
         } catch (SQLException e) {
             logger.error("Customer existence validation.", e);
@@ -98,27 +95,18 @@ public class CustomerDao implements Dao<Customer> {
         return false;
     }
 
-    public void authenticate(String userEmail, String password) {
+    public Customer authenticate(Customer customer) throws SQLException {
+        ArrayList<Customer> customers = new ArrayList<>();
         Connection conn = driver.connect();
-        CallableStatement callstatement = null;
-        try {
-            callstatement = conn.prepareCall("CALL login(?,?,?);");
-            callstatement.setString(1, "siz16@pitt.edu");
-            callstatement.setString(2, "12345567");
-            callstatement.registerOutParameter(3, Types.INTEGER);
-            callstatement.execute();
-            System.out.println(callstatement.getInt(3));
-        } catch (SQLException e) {
-            logger.error(e);
-        } finally {
-            if (callstatement != null) {
-                try {
-                    callstatement.close();
-                } catch (SQLException e) {
-                    System.out.println("Authenticate callable statement failed to close! ");
-                }
-            }
+        String query = "SELECT * FROM Customer WHERE cus_email = ? AND cus_password = ?";
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, customer.getCus_email());
+        ps.setString(2, customer.getCus_password());
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            customers.add(fromResultSet(rs));
         }
+        return customers.size() == 1 ? customers.get(0) : null;
     }
 
     /**
@@ -126,13 +114,9 @@ public class CustomerDao implements Dao<Customer> {
      */
     private boolean emailExist(String email) throws SQLException {
         Connection conn = driver.connect();
-        int count = 0;
-        ResultSet rs = fetchElementByEmail(conn, email);
-        while (rs.next()) {
-            count++;
-        }
+        Customer customer = fetchElementByEmail(conn, email);
         conn.close();
-        return count != 0;
+        return customer != null;
     }
 
     /**
@@ -140,14 +124,29 @@ public class CustomerDao implements Dao<Customer> {
      *
      * @return Customer
      */
-    public ResultSet fetchElementByEmail(Connection conn, String email) throws SQLException {
+    public Customer fetchElementByEmail(Connection conn, String email) throws SQLException {
+        ArrayList<Customer> customers = new ArrayList<>();
         String query = "SELECT * FROM Customer WHERE cus_email = ?";
         PreparedStatement ps = conn.prepareStatement(query);
         ps.setString(1, email);
-        return ps.executeQuery();
-//        System.out.println("We can't get this customer by email! ");
-//        e.printStackTrace();
-//        return null;
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            customers.add(fromResultSet(rs));
+        }
+        return customers.size() == 1 ? customers.get(0) : null;
+    }
+
+    private Customer fromResultSet(ResultSet rs) throws SQLException {
+        Customer customer = new Customer();
+        customer.setCus_id(rs.getInt(1));
+        customer.setCus_name(rs.getString(2));
+        customer.setCus_password(rs.getString(3));
+        customer.setCus_gender(rs.getString(4));
+        customer.setCus_age(rs.getInt(5));
+        customer.setCus_email(rs.getString(6));
+        customer.setCus_address(rs.getString(7));
+        customer.setCus_phone(rs.getString(8));
+        return customer;
     }
 
 }

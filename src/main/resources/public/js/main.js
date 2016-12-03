@@ -2,34 +2,55 @@ require('../css/style.css');
 let $ = require("jquery");
 window.$ = window.jQuery = $;
 window.AdminLTEOptions = require('../config/AdminLTEOptions.js');
+<!-- bootstrap datepicker -->
+require("../lib/AdminLTE/plugins/datepicker/bootstrap-datepicker.js");
+<!-- InputMask -->
+require("../lib/AdminLTE/plugins/input-mask/jquery.inputmask.js");
+require("../lib/AdminLTE/plugins/input-mask/jquery.inputmask.phone.extensions.js");
 let _ = require('underscore');
-let View = require('./view');
-let Model = require('./model');
+let View = require('./view.js');
+let Model = require('./model.js');
 let utils = require('./utils');
+let _vars = require('!css-variables!../css/variables.css');
 
 $(document).ready(function () {
-    console.log("page loaded.");
-});
-
-$('#register-button').on("click", function () {
-    let customer = new Model.Customer();
-    customer.save(null, {
-        success: function (mod, res, opts) {
-            console.log(res);
-        },
-        error: function (mod, xhr, opts) {
-            if (xhr.status === 409) {
-                console.log("email taken.");
-            }
+    loadDom();
+    console.log("loaded.");
+    let customerModel = new Model.Customer();
+    let customerBadgeView = new View.CustomerBadgeView({
+        model: customerModel
+    });
+    customerBadgeView.render();
+    let loginMaskView = new View.LoginMaskView({
+        model: customerModel
+    });
+    let registrationMaskView = new View.RegisterMaskView({
+        model: customerModel
+    });
+    $('#login-button').on("click", function () {
+        loginMaskView.render();
+    });
+    customerModel.on("change",function () {
+        if(customerModel.hasChanged("isLoggedIn")){
+            customerBadgeView.render();
         }
     });
-    // loginCheck(user);
+
 });
+function loadDom() {
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%' // optional
+    });
 
-function loginCheck(user) {
-    console.log(utils.emailValidate(user.email));
+    // Date picker
+    $('#datepicker').datepicker({
+        autoclose: true
+    });
+
+    // Phone mask
+    $(":input").inputmask();
 }
 
-function isLoggedIn() {
-    return false;
-}
+

@@ -3,43 +3,51 @@ let _ = require('underscore');
 let Backbone = require('backbone');
 Backbone.$ = $;
 let utils = require('./utils');
+const default_img_path_without_suffix = "../img/user-default";
 
 let Customer = Backbone.Model.extend({
-                                         url: "register",
-                                         defaults: {
-                                             cus_name: "user_" + (new Date()).getTime(),
-                                             cus_password: (new Date()).getTime(),
-                                             cus_gender: "male",
-                                             cus_age: 1,
-                                             cus_email: (new Date()).getTime() + "@test.com",
-                                             cus_address: "135 N Bellefield Ave, Unit 403, Pittsburgh PA 15213",
-                                             cus_phone: "4124121212"
-                                         },
-                                         initialize: function () {
-                                             // this.set("cus_email", "asd11@qq.com");
-                                         },
-                                         validationError: "",
-                                         validate: function () {
-                                             let errMsg = "";
-                                             if (!utils.emailValidate(this.attributes.cus_email)) {
-                                                 errMsg = "invalid email.";
-                                             } else if (!utils.ageValidate(
-                                                     this.attributes.cus_age)) {
-                                                 errMsg = "invalid age.";
-                                             } else if (!utils.phoneValidate(
-                                                     this.attributes.cus_phone)) {
-                                                 errMsg = "invalid phone number.";
-                                             } else if (!utils.genderValidate(
-                                                     this.attributes.cus_gender)) {
-                                                 errMsg = "invalid gender.";
-                                             }
-                                             if (errMsg !== "") {
-                                                 this.validationError = errMsg;
-                                                 return errMsg;
-                                             }
-                                         }
-                                     }
-);
+    url: "register",
+    default: {
+        isLoggedIn: false
+    },
+    initialize: function () {
+        // this.set("cus_email", "asd11@qq.com");
+    },
+    validationError: "",
+    validate: function () {
+        var self = this;
+        let errMsg = "";
+        if (!utils.emailValidate(self.attributes.cus_email)) {
+            errMsg = "invalid email.";
+        } else if (!utils.ageValidate(self.attributes.cus_age)) {
+            errMsg = "invalid age.";
+        } else if (!utils.phoneValidate(self.attributes.cus_phone)) {
+            errMsg = "invalid phone number.";
+        } else if (!utils.genderValidate(self.attributes.cus_gender)) {
+            errMsg = "invalid gender.";
+        }
+        if (errMsg !== "") {
+            self.validationError = errMsg;
+            return errMsg;
+        }
+    },
+    parseWith: function (customer) {
+        this.set({
+            cus_id: customer.cus_id,
+            cus_name: customer.cus_name,
+            cus_password: customer.cus_password,
+            cus_gender: customer.cus_gender,
+            cus_age: customer.cus_age,
+            cus_email: customer.cus_email,
+            cus_address: customer.cus_address,
+            cus_phone: customer.cus_phone,
+        });
+        this.setAvatar(default_img_path_without_suffix);
+    },
+    setAvatar: function (img_path) {
+        this.set("cus_img", img_path);
+    }
+});
 
 module.exports = {
     Customer: Customer

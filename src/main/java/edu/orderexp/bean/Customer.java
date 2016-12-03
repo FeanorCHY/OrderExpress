@@ -27,6 +27,15 @@ public class Customer {
 		favors = new ArrayList<Dish>();
 	}
 
+	public Customer(String cus_email){
+		this.setCus_email(cus_email);
+	}
+
+	public Customer(String cus_email, String cus_password){
+        this.setCus_email(cus_email);
+        this.setCus_password(cus_password);
+    }
+
 	public Customer(String cus_name, String cus_password, String cus_gender, int cus_age, String cus_email, String cus_address, String cus_phone) {
 		this.cus_name = cus_name;
 		this.cus_password = cus_password;
