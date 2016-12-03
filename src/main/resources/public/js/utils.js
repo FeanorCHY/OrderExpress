@@ -18,7 +18,7 @@ let utils = {
         return re.test(userName);
     },
     passwordValidate: function (password) {
-        var re = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+        var re = /^(?=.*[0-9])(?=.*[!@#$%^&*]).*[a-zA-Z0-9!@#$%^&*]$/;
         return re.test(password);
     },
     dateValidate: function (bDay) {

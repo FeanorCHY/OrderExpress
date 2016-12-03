@@ -2308,13 +2308,7 @@
 	        let self = this,
 	            c = $('#register_cus_email'),
 	            cus_email = c.find('#cus_email').val();
-	        if (cus_email === "") {
-	            this.setStatus(c, "error", "Email cannot be empty.");
-	        } else if (!utils.emailValidate(cus_email)) {
-	            this.setStatus(c, "error", "Typo in email?");
-	        } else if (cus_email.length > 45) {
-	            this.setStatus(c, "error", "Email should contain no more than 45 letters.");
-	        } else {
+	        if (self.emailPreValidation(c)) {
 	            $.when(self.emailExistence(cus_email)).done(function (data) {
 	                self.setStatus(c, "error", "Email has already been taken. Try another please.");
 	            }).fail(function (xhr, textStatus) {
@@ -2324,6 +2318,23 @@
 	                self.nowClear(c);
 	            });
 	        }
+	    },
+	    emailPreValidation: function (c) {
+	        let flag = false,
+	            cus_email = c.find('#cus_email').val();
+	        if (cus_email === "") {
+	            this.setStatus(c, "error", "Email cannot be empty.");
+	            flag = false;
+	        } else if (!utils.emailValidate(cus_email)) {
+	            this.setStatus(c, "error", "Typo in email?");
+	            flag = false;
+	        } else if (cus_email.length > 45) {
+	            this.setStatus(c, "error", "Email should contain no more than 45 letters.");
+	            flag = false;
+	        } else {
+	            flag = true;
+	        }
+	        return flag;
 	    },
 	    passwordValidation: function () {
 	        let c = $('#register_cus_password'),
@@ -2336,16 +2347,20 @@
 	            this.setStatus(c, "error", "At least one number and one special character from \"!@#$%^&*\" are required.");
 	            flag = false;
 	        } else {
-	            if (cus_password.length < 8 || cus_password.length > 16) {
-	                this.model.set("cus_password", cus_password);
-	                this.setStatus(c, "warning", "Password from 8 to 16 digits is recommended.");
-	            } else {
+	            if (cus_password.length > 45) {
+	                this.setStatus(c, "error", "Password should contain no more than 45 letters.");
+	                flag = false;
+	            } else if (cus_password.length >= 8 && cus_password.length <= 16) {
 	                this.model.set("cus_password", cus_password);
 	                c.find('.help-block').html("");
 	                c.find('.form-control-feedback').html(ui["success"]);
 	                this.nowClear(c);
+	                flag = true;
+	            } else {
+	                this.model.set("cus_password", cus_password);
+	                this.setStatus(c, "warning", "Password from 8 to 16 digits is recommended.");
+	                flag = true;
 	            }
-	            flag = true;
 	        }
 	        return flag;
 	    },
@@ -2419,12 +2434,12 @@
 	    },
 	    agreeToTermValidation: function () {
 	        if (!$("#register_agree_to_term").parent().hasClass("checked") && (typeof $("#alert-box")[0]) === "undefined") {
-	            $(".register-box").append("" +
-	                "<div id='alert-box' class='alert alert-info alert-dismissible'>" +
-	                "<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>" +
-	                "<h4><i class='icon fa fa-info'></i> Before Registration</h4>" +
-	                "Read and agree to our <a href='#'>terms</a> before start to use." +
-	                "</div>")
+	            $(".register-box").append("\
+	                <div id='alert-box' class='alert alert-info alert-dismissible'>\
+	                <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>\
+	                <h4><i class='icon fa fa-info'></i> Before Registration</h4>\
+	                Read and agree to our <a href='#'>terms</a> before start to use.\
+	                </div>");
 	        }
 	    },
 	    submitValidation: function () {
@@ -2438,16 +2453,15 @@
 	        }
 	        this.model.set("cus_gender", cus_gender);
 	        this.agreeToTermValidation();
-	        console.log(this.model.attributes);
-	        $.when(self.emailExistence(cus_email)).done(function (data) {
-	            self.setStatus(emailContainer, "error", "Email has already been taken. Try another please.");
-	        }).fail(function (xhr, textStatus) {
-	            self.model.set("cus_email", cus_email);
-	            emailContainer.find('.help-block').html("");
-	            emailContainer.find('.form-control-feedback').html(ui["success"]);
-	            self.nowClear(emailContainer);
-	            if (self.nameValidation() && self.passwordValidation() && self.dateValidation() &&
-	                self.addressValidation() && self.phoneValidation()) {
+	        if (self.nameValidation() & self.passwordValidation() & self.dateValidation() &
+	            self.emailPreValidation(emailContainer) & self.addressValidation() & self.phoneValidation()) {
+	            $.when(self.emailExistence(cus_email)).done(function (data) {
+	                self.setStatus(emailContainer, "error", "Email has already been taken. Try another please.");
+	            }).fail(function (xhr, textStatus) {
+	                self.model.set("cus_email", cus_email);
+	                emailContainer.find('.help-block').html("");
+	                emailContainer.find('.form-control-feedback').html(ui["success"]);
+	                self.nowClear(emailContainer);
 	                self.parseRegistration();
 	                console.log(self.model.attributes);
 	                $.when($.post({
@@ -2464,9 +2478,8 @@
 	                    }
 	                    console.log(xhr);
 	                });
-	            }
-	        });
-
+	            });
+	        }
 	    },
 	    parseRegistration: function () {
 	        let self = this,
@@ -4529,7 +4542,7 @@
 	        return re.test(userName);
 	    },
 	    passwordValidate: function (password) {
-	        var re = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+	        var re = /^(?=.*[0-9])(?=.*[!@#$%^&*]).*[a-zA-Z0-9!@#$%^&*]$/;
 	        return re.test(password);
 	    },
 	    dateValidate: function (bDay) {
