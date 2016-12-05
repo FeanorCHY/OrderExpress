@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,12 +18,14 @@
     <link rel="stylesheet" href="lib/AdminLTE/plugins/iCheck/square/blue.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="lib/AdminLTE/dist/css/AdminLTE.min.css">
+    <!-- Ion-rangeSlider -->
+    <link rel="stylesheet" href="lib/ion-rangeslider/css/ion.rangeSlider.css">
+    <link rel="stylesheet" href="lib/ion-rangeslider/css/ion.rangeSlider.skinFlat.css">
     <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
           page. However, you can choose any other skin. Make sure you
           apply the skin class to the body tag so the changes take effect.
     -->
     <link rel="stylesheet" href="lib/AdminLTE/dist/css/skins/skin-blue.min.css">
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -32,30 +35,42 @@
     <!-- [end AdminLTE Components] -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<!--
-BODY TAG OPTIONS:
-=================
-Apply one or more of the following classes to get the
-desired effect
-|---------------------------------------------------------|
-| SKINS         | skin-blue                               |
-|               | skin-black                              |
-|               | skin-purple                             |
-|               | skin-yellow                             |
-|               | skin-red                                |
-|               | skin-green                              |
-|---------------------------------------------------------|
-|LAYOUT OPTIONS | fixed                                   |
-|               | layout-boxed                            |
-|               | layout-top-nav                          |
-|               | sidebar-collapse                        |
-|               | sidebar-mini                            |
-|---------------------------------------------------------|
--->
+
 <body class="hold-transition skin-blue layout-top-nav">
-
+<script type="text/template" id="restaurant-cuisine-template">
+    <div class="checkbox icheck">
+        <% _.each(list, function(value, key){ %>
+        <label style="margin-bottom: 10px;">
+            <input type="checkbox" id="dish-cuisine-<%= key.toLowerCase().replace(' ', '-') %>" class="restaurant-cuisine-icheck" value="<%=key%>"> &nbsp;<%=key%>
+            - (<%= value %>)
+        </label>
+        <br>
+        <% }); %>
+    </div>
+</script>
+<script type="text/template" id="restaurant-search-result-template">
+    <table class="table table-hover">
+        <tbody>
+        <tr>
+            <th>Restaurant</th>
+            <th>Cuisine</th>
+            <th>Rating</th>
+            <th>Average Price</th>
+            <th>Delivery Time</th>
+        </tr>
+        <% _.each(restaurants, function(restaurant, index, list){ %>
+        <tr>
+            <td><%= restaurant.res_name %></td>
+            <td><%= restaurant.res_type %></td>
+            <td><span class="label label-<%= restaurant.res_rating<2?'danger':restaurant.res_rating<4?'warning':'success' %>"><%= restaurant.res_rating %></span></td>
+            <td>$<%= Math.round(restaurant.res_avg_price*100)/100 %></td>
+            <td><%= restaurant.res_delivery_time %> min</td>
+        </tr>
+        <% }); %>
+        </tbody>
+    </table>
+</script>
 <div class="wrapper">
-
     <header class="main-header">
         <nav class="navbar navbar-static-top">
             <div class="container">
@@ -66,14 +81,12 @@ desired effect
                         <i class="fa fa-bars"></i>
                     </button>
                 </div>
-
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
                     <ul class="nav navbar-nav">
-                        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-                        <li><a href="#">Link</a></li>
+                        <li class="active"><a href="#"> Join us <span class="sr-only">(current)</span></a></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span
+                            <a href="" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span
                                     class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="#">Action</a></li>
@@ -97,49 +110,6 @@ desired effect
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
                         <!-- Messages: style can be found in dropdown.less-->
-                        <li class="dropdown messages-menu">
-                            <!-- Menu toggle button -->
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-envelope-o"></i>
-                                <span class="label label-success">4</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="header">You have 4 messages</li>
-                                <li>
-                                    <!-- inner menu: contains the messages -->
-                                    <div class="slimScrollDiv"
-                                         style="position: relative; overflow: hidden; width: auto; height: 200px;">
-                                        <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-                                            <li><!-- start message -->
-                                                <a href="#">
-                                                    <div class="pull-left">
-                                                        <!-- User Image -->
-                                                        <img src="lib/AdminLTE/dist/img/user2-160x160.jpg"
-                                                             class="img-circle" alt="User Image">
-                                                    </div>
-                                                    <!-- Message title and timestamp -->
-                                                    <h4>
-                                                        Support Team
-                                                        <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                                    </h4>
-                                                    <!-- The message -->
-                                                    <p>Why not buy a new awesome theme?</p>
-                                                </a>
-                                            </li>
-                                            <!-- end message -->
-                                        </ul>
-                                        <div class="slimScrollBar"
-                                             style="background: rgb(0, 0, 0); width: 3px; position: absolute; top: 0px; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px;"></div>
-                                        <div class="slimScrollRail"
-                                             style="width: 3px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
-                                    </div>
-                                    <!-- /.menu -->
-                                </li>
-                                <li class="footer"><a href="#">See All Messages</a></li>
-                            </ul>
-                        </li>
-                        <!-- /.messages-menu -->
-
                         <!-- Notifications Menu -->
                         <li class="dropdown notifications-menu">
                             <!-- Menu toggle button -->
@@ -154,7 +124,8 @@ desired effect
                                     <div class="slimScrollDiv"
                                          style="position: relative; overflow: hidden; width: auto; height: 200px;">
                                         <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-                                            <li><!-- start notification -->
+                                            <li>
+                                                <!-- start notification -->
                                                 <a href="#">
                                                     <i class="fa fa-users text-aqua"></i> 5 new members joined today
                                                 </a>
@@ -170,59 +141,14 @@ desired effect
                                 <li class="footer"><a href="#">View all</a></li>
                             </ul>
                         </li>
-                        <!-- Tasks Menu -->
-                        <li class="dropdown tasks-menu">
-                            <!-- Menu Toggle Button -->
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-flag-o"></i>
-                                <span class="label label-danger">9</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="header">You have 9 tasks</li>
-                                <li>
-                                    <!-- Inner menu: contains the tasks -->
-                                    <div class="slimScrollDiv"
-                                         style="position: relative; overflow: hidden; width: auto; height: 200px;">
-                                        <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-                                            <li><!-- Task item -->
-                                                <a href="#">
-                                                    <!-- Task title and progress text -->
-                                                    <h3>
-                                                        Design some buttons
-                                                        <small class="pull-right">20%</small>
-                                                    </h3>
-                                                    <!-- The progress bar -->
-                                                    <div class="progress xs">
-                                                        <!-- Change the css width attribute to simulate progress -->
-                                                        <div class="progress-bar progress-bar-aqua" style="width: 20%"
-                                                             role="progressbar" aria-valuenow="20" aria-valuemin="0"
-                                                             aria-valuemax="100">
-                                                            <span class="sr-only">20% Complete</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <!-- end task item -->
-                                        </ul>
-                                        <div class="slimScrollBar"
-                                             style="background: rgb(0, 0, 0); width: 3px; position: absolute; top: 0px; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px;"></div>
-                                        <div class="slimScrollRail"
-                                             style="width: 3px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
-                                    </div>
-                                </li>
-                                <li class="footer">
-                                    <a href="#">View all tasks</a>
-                                </li>
-                            </ul>
-                        </li>
                         <!-- Control Sidebar Toggle Button -->
                         <li>
                             <a href="#" data-toggle="control-sidebar"><i class="fa fa-shopping-cart"
-                                                                         aria-hidden="true"></i></a>
+                                                                         aria-hidden="true"></i><span
+                                    class="label label-danger">9</span></a>
                         </li>
                         <!-- User Account Menu -->
                         <li id="customer-badge" class="dropdown user user-menu">
-
                         </li>
                         <li id="login-button" class="dropdown login-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="display: block;"
@@ -241,44 +167,75 @@ desired effect
             <!-- Content Header (Page header) -->
             <section class="content-header">
                 <h1>
-                    Top Navigation
-                    <small>Example 2.0</small>
+                    Pick a Restaurant
+                    <small>And we deliver your favorite food!</small>
                 </h1>
-                <ol class="breadcrumb">
-                    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                    <li><a href="#">Layout</a></li>
-                    <li class="active">Top Navigation</li>
-                </ol>
             </section>
-
             <!-- Main content -->
             <section class="content">
-                <div class="callout callout-info">
-                    <h4>Tip!</h4>
-
-                    <p>Add the layout-top-nav class to the body tag to get this layout. This feature can also be used
-                        with a
-                        sidebar! So use this class if you want to remove the custom dropdown menus from the navbar and
-                        use regular
-                        links instead.</p>
-                </div>
-                <div class="callout callout-danger">
-                    <h4>Warning!</h4>
-
-                    <p>The construction of this layout differs from the normal one. In other words, the HTML markup of
-                        the navbar
-                        and the content will slightly differ than that of the normal layout.</p>
-                </div>
-                <div class="box box-default">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Blank Box</h3>
+                <div id="restaurant-filter" class="row">
+                    <div id="side-filter" class="col-xs-4">
+                        <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Restaurant Filter</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <div class="row margin">
+                                    <h4>Cuisine</h4>
+                                    <div id="restaurant-cuisine" class="col-sm-12">
+                                        <div class="overlay">
+                                            <i class="fa fa-refresh fa-spin"></i>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <h4>Average Price</h4>
+                                    <div class="col-sm-12">
+                                        <input id="avg-price-range" type="text" name="avg-price-range"
+                                               class="irs-hidden-input hidden-range" readonly="">
+                                    </div>
+                                    <br>
+                                    <h4>Rating</h4>
+                                    <div class="col-sm-12">
+                                        <input id="rating-range" type="text" name="rating-range"
+                                               class="irs-hidden-input hidden-range" readonly="">
+                                    </div>
+                                    <br>
+                                    <h4>Delivery Time</h4>
+                                    <div class="col-sm-12">
+                                        <input id="delivery-time-range" type="text" name="delivery-time-range"
+                                               class="irs-hidden-input hidden-range" readonly="">
+                                    </div>
+                                    <br>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
                     </div>
-                    <div class="box-body">
-                        The great content goes here
+                    <div class="col-xs-8">
+                        <div class="box box-info">
+                            <div class="box-header">
+                                <h3 class="box-title">Restaurants</h3>
+                                <div class="box-tools">
+                                    <div class="input-group input-group-sm" style="width: 150px;">
+                                        <input type="text" name="table_search" class="form-control pull-right"
+                                               placeholder="Search">
+                                        <div class="input-group-btn">
+                                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="restaurant-search-result" class="box-body table-responsive no-padding">
+
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <!-- /.box -->
                     </div>
-                    <!-- /.box-body -->
                 </div>
-                <!-- /.box -->
             </section>
             <!-- /.content -->
         </div>
@@ -304,20 +261,21 @@ desired effect
     <div class="control-sidebar-bg"></div>
 </div>
 <!-- ./wrapper -->
-
 <!-- REQUIRED JS SCRIPTS -->
-
 <!-- jQuery 2.2.3 -->
 <script src="lib/AdminLTE/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="lib/AdminLTE/bootstrap/js/bootstrap.min.js"></script>
+<!-- Ion-rangeSlider -->
+<script src="lib/ion-rangeslider/js/ion.rangeSlider.min.js"></script>
 <!-- main.entry.js -->
 <script src="bin/main.entry.js"></script>
 <!-- AdminLTE App -->
 <script src="lib/AdminLTE/dist/js/app.min.js"></script>
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
-     Both of these plugins are recommended to enhance the
-     user experience. Slimscroll is required when using the
-     fixed layout. -->
+ Both of these plugins are recommended to enhance the
+ user experience. Slimscroll is required when using the
+ fixed layout. -->
 </body>
+
 </html>

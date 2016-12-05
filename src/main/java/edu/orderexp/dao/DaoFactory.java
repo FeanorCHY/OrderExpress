@@ -22,7 +22,11 @@ public class DaoFactory {
         }
     }
 
-    public CustomerDao getCustomerDao(){
+    public CustomerDao getCustomerDao() {
         return new CustomerDao(driver);
     }
+
+    public RestaurantDao getRestaurantDao() {return new RestaurantDao(driver);}
+
+    public DishDao getDishDao() {return new DishDao(driver);}
 }

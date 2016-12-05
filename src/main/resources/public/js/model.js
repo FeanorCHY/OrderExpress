@@ -40,7 +40,7 @@ let Customer = Backbone.Model.extend({
             cus_age: customer.cus_age,
             cus_email: customer.cus_email,
             cus_address: customer.cus_address,
-            cus_phone: customer.cus_phone,
+            cus_phone: customer.cus_phone
         });
         this.setAvatar(default_img_path_without_suffix);
     },
@@ -49,6 +49,114 @@ let Customer = Backbone.Model.extend({
     }
 });
 
+let RestaurantFilterModel = Backbone.Model.extend({
+    defaults: {
+        res_type: "",
+        avg_price: "10,30",
+        res_rating: "4,5",
+        res_delivery_time: "30,60"
+    },
+    initialize: function () {
+
+    },
+    bindEvents: function () {
+        let self = this;
+        $(".checkbox.icheck label, .checkbox.icheck label div ins").map(function (idx, icheck) {
+            icheck.addEventListener("click", function () {
+                self.bindUpdateType();
+            })
+        });
+        this.bindUpdateType();
+        this.bindUpdateAvgPrice();
+        this.bindUpdateRating();
+        this.bindUpdateDeliveryTime();
+    },
+    bindUpdateType: function () {
+
+        let tempResType = "";
+        $("#restaurant-cuisine .icheckbox_square-blue").map(function (idx, element) {
+            let e = $(element);
+            if (e.hasClass("checked")) {
+                tempResType += e.find("input").val() + ",";
+            }
+        });
+        this.set("res_type", tempResType);
+    },
+    bindUpdateAvgPrice: function () {
+        this.updateRange("avg_price", "#avg-price-range");
+    },
+    bindUpdateRating: function () {
+        this.updateRange("res_rating", "#rating-range");
+    },
+    bindUpdateDeliveryTime: function () {
+        this.updateRange("res_delivery_time", "#delivery-time-range");
+    },
+    updateRange: function (attribute, inputElement) {
+        let self = this,
+            input = $(inputElement),
+            root = input.parent();
+        root.find(".from, .irs-from, .to, .irs-to").map(function (idx, element) {
+            element.addEventListener("mouseup", function () {
+                self.set(attribute, input.val());
+            });
+        });
+    },
+    preFetchValidation: function (restaurantTypeModel) {
+        if (this.get("res_type") === "") {
+            this.set("res_type", Object.keys(restaurantTypeModel.attributes).join());
+        }
+    }
+});
+
+let RestaurantTypeModel = Backbone.Model.extend({
+    url: function () {
+        let base = "/search/cuisine";
+        if (this.isNew()) {
+            return base;
+        }
+        return utils.slash(base) + this.id;
+    },
+    fetchData: function () {
+        let self = this;
+        this.fetch({
+            success: function (model, response, options) {
+                this.model = model;
+            },
+            error: function (model, response, options) {
+            }
+        });
+    }
+});
+
+let RestaurantModel = Backbone.Model.extend({
+    url: "/restaurant",
+    default: {},
+    initialize: function () {
+    },
+    validate: function () {
+    },
+    parse: function () {
+    }
+});
+
+let DishModel = Backbone.Model.extend({
+    url: "/dish",
+    default: {},
+    initialize: function () {
+
+    },
+    validate: function () {
+
+    },
+    parse: function () {
+
+    }
+});
+
 module.exports = {
-    Customer: Customer
+    Customer: Customer,
+    RestaurantFilterModel: RestaurantFilterModel,
+    RestaurantModel: RestaurantModel,
+    RestaurantTypeModel: RestaurantTypeModel,
+    DishModel: DishModel
 };

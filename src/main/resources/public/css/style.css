@@ -1,3 +1,28 @@
+/*
+ * Page: index
+ * ----------------------
+ */
+
+/*
+ *Filters
+ */
+#side-filter .box-body {
+    margin-top: -30px;
+}
+
+#restaurant-cuisine {
+    min-height: 300px;
+}
+.hidden-range {
+    display: none;
+}
+
+/*
+ * search-result
+ */
+#restaurant-search-result {
+    min-height: 645px;
+}
 
 /*
  * Page: Login & Register

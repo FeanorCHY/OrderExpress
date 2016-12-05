@@ -24,6 +24,21 @@ let utils = {
     dateValidate: function (bDay) {
         var re = /^((0?[1-9]|1[012])[- /.](0?[1-9]|[12][0-9]|3[01])[- /.](19|20)?[0-9]{2})*$/;
         return re.test(bDay);
+    },
+    slash: function (url) {
+        return url.charAt(url.length - 1) === '/' ? url : url + '/';
+    },
+    secureElement: function (element) {
+        if(element.length!==0)
+            return element.html();
+        else return "";
+    },
+    ui: {
+        empty: "",
+        success: "<i class='fa fa-check' style='color:#00a65a'></i>",
+        warning: "<i class='fa fa-bell-o' style='color:#f39c12'></i>",
+        error: "<i class='fa fa-times-circle-o' style='color:#dd4b39'></i>",
+        overlayIcon: "<div class='overlay'><i class='fa fa-refresh fa-spin'></i></div>"
     }
 };
 

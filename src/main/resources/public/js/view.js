@@ -5,16 +5,7 @@ Backbone.$ = $;
 let _vars = require('!css-variables!../css/variables.css');
 let utils = require('./utils');
 const __templateRoot = "../templates/";
-const ui = {
-    success: "<i class='fa fa-check' style='color:#00a65a'></i>",
-    warning: "<i class='fa fa-bell-o' style='color:#f39c12'></i>",
-    error: "<i class='fa fa-times-circle-o' style='color:#dd4b39'></i>"
-};
 require('../lib/AdminLTE/plugins/iCheck/icheck');
-
-_.templateSettings = {
-    interpolate: /\{\{(.+?)\}\}/g
-};
 
 let CustomerBadgeView = Backbone.View.extend({
     el: '#customer-badge',
@@ -86,6 +77,7 @@ let LoginMaskView = Backbone.View.extend({
                     data: JSON.stringify(self.model.attributes),
                     dataType: 'json'
                 })).done(function (data) {
+                    console.log(data.statusMsg);
                     $("#info-message-container").css("margin-top", "-30px");
                     $("#info-message").html(data.statusMsg);
                     self.model.parseWith(data.customer);
@@ -93,6 +85,14 @@ let LoginMaskView = Backbone.View.extend({
                     self.removeMask();
                 }).fail(function (xhr, textStatus) {
                     console.log(xhr.status + ": " + xhr.responseJSON.statusMsg);
+                    $("#info-message-container").css("margin-top", "-30px");
+                    $("#info-message").html(xhr.responseJSON.statusMsg);
+                    if (xhr.status === 422) {
+                        $("#login-cus-password").focus().select();
+                    } else if (xhr.status === 404) {
+                        $("#login-cus-password").val("");
+                        $("#login-cus-email").focus().select();
+                    }
                 });
             }
         });
@@ -115,9 +115,6 @@ let LoginMaskView = Backbone.View.extend({
 
 let RegisterMaskView = Backbone.View.extend({
     el: '#register-box-body',
-    initialize: function () {
-        this.bindEvents();
-    },
     bindEvents: function () {
         let self = this;
         $('#cus_name').on("input blur", function () {
@@ -176,7 +173,7 @@ let RegisterMaskView = Backbone.View.extend({
         } else {
             this.model.set("cus_name", cus_name);
             c.find('.help-block').html("");
-            c.find('.form-control-feedback').html(ui["success"]);
+            c.find('.form-control-feedback').html(utils.ui.success);
             this.nowClear(c);
             flag = true;
         }
@@ -192,7 +189,7 @@ let RegisterMaskView = Backbone.View.extend({
             }).fail(function (xhr, textStatus) {
                 self.model.set("cus_email", cus_email);
                 c.find('.help-block').html("");
-                c.find('.form-control-feedback').html(ui["success"]);
+                c.find('.form-control-feedback').html(utils.ui.success);
                 self.nowClear(c);
             });
         }
@@ -231,7 +228,7 @@ let RegisterMaskView = Backbone.View.extend({
             } else if (cus_password.length >= 8 && cus_password.length <= 16) {
                 this.model.set("cus_password", cus_password);
                 c.find('.help-block').html("");
-                c.find('.form-control-feedback').html(ui["success"]);
+                c.find('.form-control-feedback').html(utils.ui.success);
                 this.nowClear(c);
                 flag = true;
             } else {
@@ -338,16 +335,14 @@ let RegisterMaskView = Backbone.View.extend({
             }).fail(function (xhr, textStatus) {
                 self.model.set("cus_email", cus_email);
                 emailContainer.find('.help-block').html("");
-                emailContainer.find('.form-control-feedback').html(ui["success"]);
+                emailContainer.find('.form-control-feedback').html(utils.ui.success);
                 self.nowClear(emailContainer);
                 self.parseRegistration();
-                console.log(self.model.attributes);
                 $.when($.post({
                     url: '/register',
                     data: JSON.stringify(self.model.attributes),
                     dataType: 'json'
                 })).done(function (data) {
-                    console.log(data.statusMsg);
                     self.model.parseWith(data.customer);
                     window.location.href = "/";
                 }).fail(function (xhr, textStatus) {
@@ -376,7 +371,7 @@ let RegisterMaskView = Backbone.View.extend({
     },
     setStatus: function (element, status, info) {
         element.find('.help-block').html(info);
-        element.find('.form-control-feedback').html(ui[status]);
+        element.find('.form-control-feedback').html(utils.ui[status]);
         this.setClass(element, "has-" + status);
     },
     setClass: function (element, className) {
@@ -387,6 +382,33 @@ let RegisterMaskView = Backbone.View.extend({
     }
 });
 
+let RestaurantTypeView = Backbone.View.extend({
+    el: '#restaurant-cuisine',
+    template: _.template(utils.secureElement($("#restaurant-cuisine-template"))),
+    render: function () {
+        let self = this;
+        this.$el.html(this.template({list: self.model.attributes}));
+        this.renderElements();
+    },
+    renderElements: function () {
+        // render icheck
+        $('.restaurant-cuisine-icheck').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    }
+});
+
+let RestaurantSearchResultView = Backbone.View.extend({
+    el: '#restaurant-search-result',
+    template: _.template(utils.secureElement($("#restaurant-search-result-template"))),
+    render: function () {
+        this.$el.html(this.template({restaurants: this.model.models.map(function (restaurant) {
+            return restaurant.attributes;
+        })}));
+    }
+});
 
 function fetchTemplate(templateIdentifier) {
     let template_url = __templateRoot + templateIdentifier + ".html";
@@ -401,5 +423,7 @@ function fetchTemplate(templateIdentifier) {
 module.exports = {
     CustomerBadgeView: CustomerBadgeView,
     LoginMaskView: LoginMaskView,
-    RegisterMaskView: RegisterMaskView
+    RegisterMaskView: RegisterMaskView,
+    RestaurantTypeView: RestaurantTypeView,
+    RestaurantSearchResultView: RestaurantSearchResultView
 };

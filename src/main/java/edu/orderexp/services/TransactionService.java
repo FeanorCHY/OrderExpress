@@ -10,10 +10,9 @@ public class TransactionService {
 
 	public TransactionService() {
 		super();
-		this.startService();
 	}
 	
-	private void startService() {
+	public void startService() {
 		/* ---------------- Transaction ---------------- */
 		//get all transaction 
 		get("/tranaction/:cus_id", (req, res) -> {

@@ -22,10 +22,9 @@ public class CustomerService {
     public CustomerService(CustomerDao cd) {
         super();
         this.cd = cd;
-        this.startService();
     }
 
-    private void startService() {
+    public void startService() {
         /* ---------------- User ---------------- */
         // register
         post("/register", (request, response) -> {
@@ -88,7 +87,7 @@ public class CustomerService {
 
         // check whether email existence at registration
         get("/user/email/:cus_email", (request, response) -> {
-           String cus_email = request.params(":cus_email");
+            String cus_email = request.params(":cus_email");
             HashMap<String, Object> attributes = new HashMap<>();
             customer = new Customer(cus_email);
 
