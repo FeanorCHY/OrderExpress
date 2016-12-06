@@ -6,8 +6,6 @@ package edu.orderexp.bean;
  * 
  */
 
-import edu.orderexp.dao.CustomerDao;
-
 import java.util.ArrayList;
 import java.util.List;
 
