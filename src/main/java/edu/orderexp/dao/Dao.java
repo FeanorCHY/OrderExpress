@@ -11,6 +11,6 @@ public interface Dao<T> {
     T fetchElementById(int id);
     T add(T t) throws SQLException;
     boolean exist(T t);
-    boolean updateById(int id) throws SQLException;
+    boolean updateById(int id, T t) throws SQLException;
     boolean deleteById(int id) throws SQLException;
 }

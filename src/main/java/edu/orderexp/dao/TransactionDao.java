@@ -77,7 +77,7 @@ public class TransactionDao implements Dao<Transaction> {
     }
 
     @Override
-    public boolean updateById(int id) throws SQLException {
+    public boolean updateById(int id, Transaction t) throws SQLException {
         return false;
     }
 

@@ -158,7 +158,7 @@ public class RestaurantDao implements Dao<Restaurant> {
     }
 
     @Override
-    public boolean updateById(int id) throws SQLException {
+    public boolean updateById(int id, Restaurant r) throws SQLException {
         return false;
     }
 

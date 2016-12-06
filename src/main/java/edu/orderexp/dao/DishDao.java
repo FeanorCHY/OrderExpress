@@ -77,7 +77,7 @@ public class DishDao implements Dao<Dish> {
     }
 
     @Override
-    public boolean updateById(int id) throws SQLException {
+    public boolean updateById(int id, Dish d) throws SQLException {
         return false;
     }
 
