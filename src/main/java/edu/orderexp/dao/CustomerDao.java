@@ -27,7 +27,26 @@ public class CustomerDao implements Dao<Customer> {
 
     @Override
     public Customer fetchElementById(int id) {
-        return null;
+    	Connection conn = driver.connect();
+    	
+    	ArrayList<Customer> customers = new ArrayList<>();
+        String query = "SELECT * FROM Customer WHERE cus_id = ?"; 
+        
+        try{
+        	PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, id);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                customers.add(fromResultSet(rs));
+            }
+            
+        } catch (SQLException e) {
+			logger.error("Fetch customer from id failed! ");
+			return null;
+		}
+        
+        return customers.size() == 1 ? customers.get(0) : null;
     }
 
     @Override
@@ -86,8 +105,35 @@ public class CustomerDao implements Dao<Customer> {
     }
 
     @Override
-    public boolean updateById(int id) throws SQLException {
-        return false;
+    public boolean updateById(int id, Customer c) throws SQLException {
+    	Connection conn = driver.connect();
+    	PreparedStatement ps = null;
+    	String query = "UPDATE Customer SET cus_name=?, cus_password=?,"
+    			+ "cus_gender=?, cus_age=?, cus_email=?, cus_address=?, cus_phone=?"
+    			+ "WHERE cus_id=?";
+    	
+    	try {
+    		ps = conn.prepareStatement(query);
+            ps.setString(1, c.getCus_name());
+            ps.setString(2, c.getCus_password());
+            ps.setString(3, c.getCus_gender());
+            ps.setInt(4, c.getCus_age());
+            ps.setString(5, c.getCus_email());
+            ps.setString(6, c.getCus_address());
+            ps.setString(7, c.getCus_phone());
+            
+            ps.setInt(8, id);
+            ps.executeUpdate();
+			
+		} catch (SQLException e) {
+			logger.error("Update customer failed!");
+			return false;
+		} finally {
+			if(ps != null) {
+				ps.close();
+			}
+		}
+    	return true;
     }
 
     @Override

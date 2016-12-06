@@ -73,16 +73,47 @@ public class CustomerService {
             return gson.toJson(attributes);
         });
 
-        //get users info
-        get("/user/:cus_id", (req, res) -> {
-            return "Hello: " + req.params(":id");
+        // get customers from database
+        get("/user/:cus_id", (request, response) -> {
+        	HashMap<String, Object> attributes = new HashMap<>();
+        	Session session = request.session(true);
+        	
+        	int cus_id = Integer.parseInt(request.params("cus_id"));
+        	customer = cd.fetchElementById(cus_id);
+        	
+        	if(customer != null) {
+        		session.attribute("customer", customer);
+        		attributes.put("customer", customer);
+        		attributes.put("statusMsg", "Customer exists. ");
+        		logger.info(customer.getCus_email() + " exists. ");
+        	} else {
+        		response.status(404); //not found
+        		attributes.put("statusMsg", "Customer inexisted. ");
+        	}
+        	
+            return gson.toJson(attributes);
         });
 
-        //update users info
-        put("/user/:cus_id", (req, res) -> {
-            String cus_id = req.params(":cus_id");
+        // update users info in database
+        put("/user/:cus_id", (request, response) -> {
+        	HashMap<String, Object> attributes = new HashMap<>();
+        	Session session = request.session(true);
+        	
+            customer = fromJson(request.body(), Customer.class);
+            int cus_id = Integer.parseInt(request.params("cus_id"));
+        	boolean updateSuccess = cd.updateById(cus_id, customer);
 
-            return "Hello: " + req.params(":id");
+            if(updateSuccess) {
+            	session.attribute("customer", customer);
+            	attributes.put("customer", customer);
+            	attributes.put("statusMsg", "Profile update success");
+            	logger.info(customer.getCus_email() + " update profile.");
+            } else {
+            	response.status(403); //forbidden
+            	attributes.put("statusMsg", "Update failed.");
+            }
+            
+            return gson.toJson(attributes);
         });
 
         // check whether email existence at registration
@@ -127,6 +158,4 @@ public class CustomerService {
         boolean isLoggedin = cd.exist(c);
         return new Customer();
     }
-
-
 }
