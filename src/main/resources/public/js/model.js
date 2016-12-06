@@ -15,7 +15,7 @@ let Customer = Backbone.Model.extend({
     },
     validationError: "",
     validate: function () {
-        var self = this;
+        let self = this;
         let errMsg = "";
         if (!utils.emailValidate(self.attributes.cus_email)) {
             errMsg = "invalid email.";
@@ -54,7 +54,8 @@ let RestaurantFilterModel = Backbone.Model.extend({
         res_type: "",
         avg_price: "10,30",
         res_rating: "4,5",
-        res_delivery_time: "30,60"
+        res_delivery_time: "30,60",
+        search_text: ""
     },
     initialize: function () {
 
@@ -70,9 +71,9 @@ let RestaurantFilterModel = Backbone.Model.extend({
         this.bindUpdateAvgPrice();
         this.bindUpdateRating();
         this.bindUpdateDeliveryTime();
+        this.bindSearchText();
     },
     bindUpdateType: function () {
-
         let tempResType = "";
         $("#restaurant-cuisine .icheckbox_square-blue").map(function (idx, element) {
             let e = $(element);
@@ -81,6 +82,17 @@ let RestaurantFilterModel = Backbone.Model.extend({
             }
         });
         this.set("res_type", tempResType);
+    },
+    bindSearchText: function () {
+        let self = this,
+            input = $("#restaurant-search-text"),
+            button = input.parent().find("button");
+        input.on("mouseup", function () {
+            self.set("search_text", input.val());
+        });
+        button.click(function () {
+            self.set("search_text", input.val());
+        });
     },
     bindUpdateAvgPrice: function () {
         this.updateRange("avg_price", "#avg-price-range");

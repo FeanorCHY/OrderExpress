@@ -39,6 +39,14 @@ let utils = {
         warning: "<i class='fa fa-bell-o' style='color:#f39c12'></i>",
         error: "<i class='fa fa-times-circle-o' style='color:#dd4b39'></i>",
         overlayIcon: "<div class='overlay'><i class='fa fa-refresh fa-spin'></i></div>"
+    },
+    loadings:{
+        hideLeftLoading:function () {
+            $("#left-panel-loading-box").hide();
+        },
+        showLeftLoading:function () {
+            $("#left-panel-loading-box").show();
+        }
     }
 };
 

@@ -62,13 +62,14 @@ public class RestaurantDao implements Dao<Restaurant> {
          * http://stackoverflow.com/questions/3107044/preparedstatement-with-list-of-parameters-in-a-in-clause
          */
         String foreQuery = "SELECT r.res_id AS res_id, r.res_name AS res_name, r.res_type AS res_type, r.res_delivery_time AS res_delivery_time, r.res_favor_times AS res_favor_time, r.res_rating AS res_rating, AVG(d.price) AS avg_price FROM OrderExpress.Restaurant r, OrderExpress.dish d WHERE (d.rest_id)=(r.res_id) AND (r.res_type) IN (";
-        String rearQuery = ") AND (r.res_delivery_time)>= (?) AND (r.res_delivery_time)<= (?) AND (r.res_rating)>= (?) AND (r.res_rating)<= (?) GROUP BY r.res_id HAVING (AVG(d.price))>= (?) AND (AVG(d.price))<= (?)";
+        String rearQuery = ") AND (r.res_delivery_time)>= (?) AND (r.res_delivery_time)<= (?) AND (r.res_rating)>= (?) AND (r.res_rating)<= (?) AND r.res_name LIKE (?) ESCAPE '!' GROUP BY r.res_id HAVING (AVG(d.price))>= (?) AND (AVG(d.price))<= (?)";
         String[] typeArray = ((String) queryParams.get("resType")).split(",");
         StringBuilder stringBuilder = new StringBuilder();
         for (String ignored : typeArray) {
             stringBuilder.append("?,");
         }
         String mid = stringBuilder.deleteCharAt(stringBuilder.length() - 1).toString();
+        String searchText = String.valueOf(queryParams.get("searchText")).replace("!", "!!").replace("%", "!%").replace("_", "!_").replace("[", "![");
         try {
             ps = conn.prepareStatement(foreQuery + mid + rearQuery);
             int i = 1;
@@ -79,6 +80,7 @@ public class RestaurantDao implements Dao<Restaurant> {
             ps.setInt(i++, Integer.parseInt(String.valueOf(queryParams.get("resDeliveryTimeCeiling"))));
             ps.setInt(i++, Integer.parseInt(String.valueOf(queryParams.get("resRatingFloor"))));
             ps.setInt(i++, Integer.parseInt(String.valueOf(queryParams.get("resRatingCeiling"))));
+            ps.setString(i++, "%" + searchText + "%");
             ps.setInt(i++, Integer.parseInt(String.valueOf(queryParams.get("avgPriceFloor"))));
             ps.setInt(i, Integer.parseInt(String.valueOf(queryParams.get("avgPriceCeiling"))));
             rs = ps.executeQuery();

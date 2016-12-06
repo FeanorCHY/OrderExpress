@@ -45,6 +45,7 @@ public class SearchService {
             String resType = request.queryParams("res_type");
             String avgPrice = request.queryParams("avg_price");
             String resRating = request.queryParams("res_rating");
+            String searchText = request.queryParams("search_text");
             String resDeliveryTime = request.queryParams("res_delivery_time");
             resType = resType.substring(0, resType.length() - (resType.endsWith(",") ? 1 : 0));
             queryParams.put("resType", resType);
@@ -57,7 +58,8 @@ public class SearchService {
             queryParams.put("resRatingCeiling", resRatingPair[1]);
             queryParams.put("resDeliveryTimeFloor", resDeliveryTimePair[0]);
             queryParams.put("resDeliveryTimeCeiling", resDeliveryTimePair[1]);
-            logger.info("Search - resType: " + resType + " avgPrice: " + avgPrice + " resRating: " + resRating + " resDeliveryTime: " + resDeliveryTime);
+            queryParams.put("searchText", searchText);
+            logger.info("Search - resType: " + resType + " searchText: " + searchText + " avgPrice: " + avgPrice + " resRating: " + resRating + " resDeliveryTime: " + resDeliveryTime);
             ArrayList<HashMap<String, Object>> results = restaurantDao.fetchResInfoByTypeAndRanges(queryParams);
             attributes.put("results", results);
             return gson.toJson(attributes);

@@ -7,28 +7,21 @@ let utils = require('./utils');
 const __templateRoot = "../templates/";
 require('../lib/AdminLTE/plugins/iCheck/icheck');
 
-let CustomerBadgeView = Backbone.View.extend({
-    el: '#customer-badge',
+
+let UserBadgeView = Backbone.View.extend({
+    el: '#user-badge',
+    template: _.template(utils.secureElement($("#user-badge-template"))),
     render: function () {
-        var self = this;
-        $.when($.getJSON("/logStatus")).done(function (data) {
-            if (data.hasOwnProperty("customer")) {
-                $('#login-button').css('display', 'none');
-                self.$el.css("display", "block");
-                self.model.parseWith(data.customer);
-                self.model.set("isLoggedIn", true);
-                $.when(fetchTemplate("customerBadge")).done(function (data) {
-                    self.template = _.template(data);
-                    self.$el.html(self.template(self.model.attributes));
-                    self.bindEvents();
-                }).fail(function (xhr, textStatus) {
-                    console.log(textStatus + ": fail to fetch template " + self.el);
-                });
-            } else {
-                $('#login-button').find('a').html('Sign In').css('display', 'block');
-                self.$el.css("display", "none");
-            }
-        });
+        let self = this;
+        if (this.model.get("isLoggedIn")) {
+            $('#login-button').css('display', 'none');
+            self.$el.css("display", "block");
+            self.$el.html(self.template(self.model.attributes));
+            self.bindEvents();
+        } else {
+            $('#login-button').find('a').html('Sign In').css('display', 'block');
+            self.$el.css("display", "none");
+        }
     },
     bindEvents: function () {
         $('#logout-button').on("click", function () {
@@ -41,10 +34,100 @@ let CustomerBadgeView = Backbone.View.extend({
     }
 });
 
+let UserProfileSummaryView = Backbone.View.extend({
+    el: '#home-left-panel',
+    template: _.template(utils.secureElement($("#user-profile-summary-template"))),
+    initialize: function () {
+    },
+    render: function () {
+        utils.loadings.showLeftLoading();
+        let self = this;
+        removeBeforeAppend();
+        this.$el.append(self.template(self.model.attributes));
+        utils.loadings.hideLeftLoading();
+    }
+});
+
+let UserProfileView = Backbone.View.extend({
+    el: '#home-right-panel',
+    template: _.template(utils.secureElement($("#user-profile-template"))),
+    initialize: function () {
+
+    },
+    render: function () {
+        let self = this;
+        this.$el.html(self.template(self.model.attributes));
+        this.bindEvents();
+    },
+    bindEvents: function () {
+        let self = this;
+        $('.user-profile-edit-gender').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+        let genderDiv = $("#user-profile-edit-gender").find("input[value=" + self.model.get("cus_gender") + "]").iCheck("check");
+
+        // Date picker
+        // $('#user-profile-edit-bday').datepicker({
+        //     autoclose: true
+        // });
+
+        // Phone mask
+        $("#user-profile-edit-phone").inputmask();
+        $("#user-profile-edit-bday").inputmask();
+
+        $("#user-profile-edit-reset").click(function () {
+            self.render();
+        });
+
+        $("#user-profile-edit-submit").click(function () {
+            self.submitValidation();
+        });
+    },
+    submitValidation: function () {
+        let cus_name = $("#user-profile-edit-name"),
+            cus_email = $("#user-profile-edit-email"),
+            cus_age = $("#user-profile-edit-bday"),
+            cus_phone = $("#user-profile-edit-phone"),
+            cus_password_1 = $("#user-profile-edit-password-1"),
+            cus_password_2 = $("#user-profile-edit-password-2"),
+            cus_gender = $("#user-profile-edit-gender").find("input:checked");
+        if (!utils.userNameValidate(cus_name.val()))
+            cus_name.parent().addClass("has-error");
+        else if (!utils.emailValidate(cus_email.val()))
+            cus_email.parent().addClass("has-error");
+        else if (!utils.ageValidate(cus_age.val()))
+            cus_age.parent().addClass("has-error");
+        else if (!utils.phoneValidate(cus_phone.val().replace(/\D/g, '')))
+            cus_phone.parent().addClass("has-error");
+        else if (!utils.genderValidate(cus_gender.val()))
+            cus_gender.addClass("has-error");
+        else if (cus_password_1.val() !== "" || cus_password_2.val() !== "") {
+            if (!(cus_password_2.val().length === cus_password_1.val().length && cus_password_2.val().length >= 8 && cus_password_2.val().length <= 45)
+                || cus_password_1.val() !== cus_password_2.val() || !utils.passwordValidate(cus_password_1.val())) {
+                cus_password_1.parent().addClass("has-error");
+                cus_password_2.parent().addClass("has-error");
+            }
+        } else {
+
+        }
+    },
+    bindTrigger: function () {
+        let self = this;
+        $("#user-edit-profile-button").click(function () {
+            self.render();
+        });
+    }
+});
+
+let TransactionView = Backbone.View.extend({});
+
 let LoginMaskView = Backbone.View.extend({
     el: 'body',
     render: function () {
-        var self = this;
+        let self = this;
         if (!this.model.get("isLoggedIn")) {
             $.when(fetchTemplate("loginMask")).done(function (data) {
                 self.template = _.template(data);
@@ -56,7 +139,7 @@ let LoginMaskView = Backbone.View.extend({
         }
     },
     bindEvents: function () {
-        var self = this;
+        let self = this;
         $(".ion-close-circled").on("click", function () {
             self.removeMask();
         });
@@ -98,7 +181,7 @@ let LoginMaskView = Backbone.View.extend({
         });
     },
     inputValidation: function () {
-        var self = this;
+        let self = this;
         if (!utils.emailValidate(self.model.get("cus_email"))) {
             $('#login-cus-email').css("border-color", _vars["--color-login-red"]);
             return false;
@@ -383,11 +466,12 @@ let RegisterMaskView = Backbone.View.extend({
 });
 
 let RestaurantTypeView = Backbone.View.extend({
-    el: '#restaurant-cuisine',
-    template: _.template(utils.secureElement($("#restaurant-cuisine-template"))),
+    el: '#home-left-panel',
+    template: _.template(utils.secureElement($("#restaurant-filter-template"))),
     render: function () {
         let self = this;
-        this.$el.html(this.template({list: self.model.attributes}));
+        utils.loadings.hideLeftLoading();
+        this.$el.append(this.template({list: self.model.attributes}));
         this.renderElements();
     },
     renderElements: function () {
@@ -397,16 +481,61 @@ let RestaurantTypeView = Backbone.View.extend({
             radioClass: 'iradio_square-blue',
             increaseArea: '20%' // optional
         });
+        // delivery-time-range
+        $("#delivery-time-range").ionRangeSlider({
+            min: 15,
+            max: 120,
+            from: 30,
+            to: 60,
+            step: 15,
+            type: 'double',
+            min_interval: 15,
+            postfix: ' min.',
+            grid: true,
+            grid_num: 7,
+            input_values_separator: ";"
+        });
+        // avg-price-range
+        $("#avg-price-range").ionRangeSlider({
+            min: 5,
+            max: 105,
+            from: 10,
+            to: 30,
+            step: 5,
+            type: 'double',
+            min_interval: 5,
+            prefix: '$',
+            grid: true,
+            grid_num: 10,
+            input_values_separator: ";"
+        });
+        // rating-range
+        $("#rating-range").ionRangeSlider({
+            min: 0,
+            max: 5,
+            from: 4,
+            to: 5,
+            step: 1,
+            type: 'double',
+            min_interval: 1,
+            grid: false,
+            input_values_separator: ";"
+        });
     }
 });
 
 let RestaurantSearchResultView = Backbone.View.extend({
-    el: '#restaurant-search-result',
+    el: '#home-right-panel',
     template: _.template(utils.secureElement($("#restaurant-search-result-template"))),
+    initialize: function () {
+        this.render();
+    },
     render: function () {
-        this.$el.html(this.template({restaurants: this.model.models.map(function (restaurant) {
-            return restaurant.attributes;
-        })}));
+        this.$el.html(this.template({
+            restaurants: this.model.models.map(function (restaurant) {
+                return restaurant.attributes;
+            })
+        }));
     }
 });
 
@@ -420,10 +549,20 @@ function fetchTemplate(templateIdentifier) {
     });
 }
 
+function removeBeforeAppend() {
+    let root = $("#home-left-panel"),
+        offspring = root.children();
+    for (let i = 1; i < offspring.length; i++) {
+        $(offspring[i]).remove();
+    }
+}
+
 module.exports = {
-    CustomerBadgeView: CustomerBadgeView,
+    UserBadgeView: UserBadgeView,
     LoginMaskView: LoginMaskView,
     RegisterMaskView: RegisterMaskView,
     RestaurantTypeView: RestaurantTypeView,
-    RestaurantSearchResultView: RestaurantSearchResultView
+    RestaurantSearchResultView: RestaurantSearchResultView,
+    UserProfileSummaryView: UserProfileSummaryView,
+    UserProfileView: UserProfileView
 };

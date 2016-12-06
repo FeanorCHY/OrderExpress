@@ -15,6 +15,7 @@ let RestaurantSearchResultCollection = Backbone.Collection.extend({
             dataType: 'json'
         })).done(function (data) {
             self.set(data.results, {reset: true});
+            self.trigger("change");
         }).fail(function (xhr, textStatus) {
             console.log(xhr.status);
         });

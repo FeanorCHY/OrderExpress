@@ -66,15 +66,27 @@
 	    console.log(window.location.href);
 	    loadDOMElements();
 	    let customerModel = new Model.Customer();
-	    let customerBadgeView = new View.CustomerBadgeView({
+	    let userBadgeView = new View.UserBadgeView({
 	        model: customerModel
 	    });
-	    customerBadgeView.render();
+	    let userProfileSummaryView = new View.UserProfileSummaryView({
+	        model: customerModel
+	    });
+	    let userProfileView = new View.UserProfileView({
+	        model: customerModel
+	    });
 	    customerModel.on("change", function () {
 	        if (customerModel.hasChanged("isLoggedIn")) {
-	            customerBadgeView.render();
+	            userBadgeView.render();
+	            if (customerModel.get("isLoggedIn")) {
+	                $("#user-profile-button").click(function () {
+	                    userProfileSummaryView.render();
+	                    userProfileView.bindTrigger();
+	                });
+	            }
 	        }
 	    });
+	    checkLogStatus(customerModel);
 	    let loginMaskView = new View.LoginMaskView({
 	        model: customerModel
 	    });
@@ -99,15 +111,12 @@
 	        model: rsrCollection
 	    });
 	    rsrCollection.on("change", function () {
-	        console.log("ye");
 	        rsrView.render();
 	    });
 	    restaurantFilterModel.on("change", function () {
-	        $("#restaurant-search-result").html(utils.ui.overlayIcon);
+	        $("#restaurant-search-table").html(utils.ui.overlayIcon);
 	        restaurantFilterModel.preFetchValidation(restaurantTypeModel);
-	        console.log("y");
 	        rsrCollection.fetchData(restaurantFilterModel.attributes);
-	        rsrCollection.trigger("change");
 	    });
 
 	    $('#login-button').on("click", function () {
@@ -131,49 +140,16 @@
 	    // Phone mask
 	    $(":input").inputmask();
 
-	    // delivery-time-range
-	    $("#delivery-time-range").ionRangeSlider({
-	        min: 15,
-	        max: 120,
-	        from: 30,
-	        to: 60,
-	        step: 15,
-	        type: 'double',
-	        min_interval: 15,
-	        postfix: ' min.',
-	        grid: true,
-	        grid_num: 7,
-	        input_values_separator: ";"
-	    });
-
-	    // avg-price-range
-	    $("#avg-price-range").ionRangeSlider({
-	        min: 5,
-	        max: 105,
-	        from: 10,
-	        to: 30,
-	        step: 5,
-	        type: 'double',
-	        min_interval: 5,
-	        prefix: '$',
-	        grid: true,
-	        grid_num: 10,
-	        input_values_separator: ";"
-	    });
-
-	    // rating-range
-	    $("#rating-range").ionRangeSlider({
-	        min: 0,
-	        max: 5,
-	        from: 4,
-	        to: 5,
-	        step: 1,
-	        type: 'double',
-	        min_interval: 1,
-	        grid: false,
-	        input_values_separator: ";"
-	    });
 	    console.log("loaded.");
+	}
+
+	function checkLogStatus(customerModel) {
+	    $.when($.getJSON("/logStatus")).done(function (data) {
+	        if (data.hasOwnProperty("customer")) {
+	            customerModel.parseWith(data.customer);
+	            customerModel.set("isLoggedIn", true);
+	        }
+	    });
 	}
 
 
@@ -214,7 +190,7 @@
 
 
 	// module
-	exports.push([module.id, "/*\n * Page: index\n * ----------------------\n */\n\n/*\n *Filters\n */\n#side-filter .box-body {\n    margin-top: -30px;\n}\n\n#restaurant-cuisine {\n    min-height: 300px;\n}\n.hidden-range {\n    display: none;\n}\n\n/*\n * search-result\n */\n#restaurant-search-result {\n    min-height: 645px;\n}\n\n/*\n * Page: Login & Register\n * ----------------------\n */\n\n.login-logo,\n.register-logo {\n    font-size: 35px;\n    text-align: center;\n    margin-bottom: 25px;\n    font-weight: 300;\n}\n\n.login-logo a,\n.register-logo a {\n    color: #444;\n}\n\n.login-page,\n.register-page {\n    background-color: #d2d6de;\n}\n\n.login-background {\n    position: fixed;\n    left: 0;\n    top: 0;\n    width: 100%;\n    min-height: 100%;\n    height: inherit;\n    background-color: #d2d6de;\n    z-index: 2000;\n    /* for IE */\n    filter: alpha(opacity=90);\n    /* CSS3 standard */\n    opacity: 0.9;\n}\n\n.login-mask {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100%;\n    min-height: 100%;\n    margin: 0 auto;\n    background: transparent;\n    z-index: 3000;\n}\n\n.login-box {\n    width: 360px;\n    margin: 7% auto;\n    z-index: 3100;\n}\n\n.register-box {\n    width: 360px;\n    margin: 7% auto;\n}\n\n@media (max-width: 768px) {\n    .login-box,\n    .register-box {\n        width: 90%;\n        margin-top: 20px;\n    }\n}\n\n.login-box-body,\n.register-box-body {\n    background: #fff;\n    padding: 20px;\n    border-top: 0;\n    color: #666;\n}\n\n.login-box-body .form-control-feedback,\n.register-box-body .form-control-feedback {\n    color: #777;\n}\n\n.login-box-msg,\n.register-box-msg {\n    margin: 0;\n    text-align: center;\n    padding: 0 20px 20px 20px;\n}\n\n.social-auth-links {\n    margin: 10px 0;\n}\n\n#chk-err {\n    color: red;\n}\n\n.clearfix:before,\n.clearfix:after {\n    content: \" \";\n    display: table;\n}\n\n.clearfix:after {\n    clear: both;\n    overflow: hidden;\n}\n\n.clearfix {\n    zoom: 1;\n    /* IE < 8 */\n}\n", ""]);
+	exports.push([module.id, "/*\n * Page: index\n * ----------------------\n */\n\n/*\n *Filters\n */\n#side-filter {\n    margin-top: -30px;\n}\n\n#restaurant-cuisine {\n    min-height: 300px;\n}\n.hidden-range {\n    display: none;\n}\n\n/*\n * search-result\n */\n#restaurant-search-table {\n    min-height: 645px;\n}\n\n/*\n * Page: Login & Register\n * ----------------------\n */\n\n.login-logo,\n.register-logo {\n    font-size: 35px;\n    text-align: center;\n    margin-bottom: 25px;\n    font-weight: 300;\n}\n\n.login-logo a,\n.register-logo a {\n    color: #444;\n}\n\n.login-page,\n.register-page {\n    background-color: #d2d6de;\n}\n\n.login-background {\n    position: fixed;\n    left: 0;\n    top: 0;\n    width: 100%;\n    min-height: 100%;\n    height: inherit;\n    background-color: #d2d6de;\n    z-index: 2000;\n    /* for IE */\n    filter: alpha(opacity=90);\n    /* CSS3 standard */\n    opacity: 0.9;\n}\n\n.login-mask {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100%;\n    min-height: 100%;\n    margin: 0 auto;\n    background: transparent;\n    z-index: 3000;\n}\n\n.login-box {\n    width: 360px;\n    margin: 7% auto;\n    z-index: 3100;\n}\n\n.register-box {\n    width: 360px;\n    margin: 7% auto;\n}\n\n@media (max-width: 768px) {\n    .login-box,\n    .register-box {\n        width: 90%;\n        margin-top: 20px;\n    }\n}\n\n.login-box-body,\n.register-box-body {\n    background: #fff;\n    padding: 20px;\n    border-top: 0;\n    color: #666;\n}\n\n.login-box-body .form-control-feedback,\n.register-box-body .form-control-feedback {\n    color: #777;\n}\n\n.login-box-msg,\n.register-box-msg {\n    margin: 0;\n    text-align: center;\n    padding: 0 20px 20px 20px;\n}\n\n.social-auth-links {\n    margin: 10px 0;\n}\n\n#chk-err {\n    color: red;\n}\n\n.clearfix:before,\n.clearfix:after {\n    content: \" \";\n    display: table;\n}\n\n.clearfix:after {\n    clear: both;\n    overflow: hidden;\n}\n\n.clearfix {\n    zoom: 1;\n    /* IE < 8 */\n}\n", ""]);
 
 	// exports
 
@@ -7895,28 +7871,21 @@
 	const __templateRoot = "../templates/";
 	__webpack_require__(16);
 
-	let CustomerBadgeView = Backbone.View.extend({
-	    el: '#customer-badge',
+
+	let UserBadgeView = Backbone.View.extend({
+	    el: '#user-badge',
+	    template: _.template(utils.secureElement($("#user-badge-template"))),
 	    render: function () {
-	        var self = this;
-	        $.when($.getJSON("/logStatus")).done(function (data) {
-	            if (data.hasOwnProperty("customer")) {
-	                $('#login-button').css('display', 'none');
-	                self.$el.css("display", "block");
-	                self.model.parseWith(data.customer);
-	                self.model.set("isLoggedIn", true);
-	                $.when(fetchTemplate("customerBadge")).done(function (data) {
-	                    self.template = _.template(data);
-	                    self.$el.html(self.template(self.model.attributes));
-	                    self.bindEvents();
-	                }).fail(function (xhr, textStatus) {
-	                    console.log(textStatus + ": fail to fetch template " + self.el);
-	                });
-	            } else {
-	                $('#login-button').find('a').html('Sign In').css('display', 'block');
-	                self.$el.css("display", "none");
-	            }
-	        });
+	        let self = this;
+	        if (this.model.get("isLoggedIn")) {
+	            $('#login-button').css('display', 'none');
+	            self.$el.css("display", "block");
+	            self.$el.html(self.template(self.model.attributes));
+	            self.bindEvents();
+	        } else {
+	            $('#login-button').find('a').html('Sign In').css('display', 'block');
+	            self.$el.css("display", "none");
+	        }
 	    },
 	    bindEvents: function () {
 	        $('#logout-button').on("click", function () {
@@ -7929,10 +7898,100 @@
 	    }
 	});
 
+	let UserProfileSummaryView = Backbone.View.extend({
+	    el: '#home-left-panel',
+	    template: _.template(utils.secureElement($("#user-profile-summary-template"))),
+	    initialize: function () {
+	    },
+	    render: function () {
+	        utils.loadings.showLeftLoading();
+	        let self = this;
+	        removeBeforeAppend();
+	        this.$el.append(self.template(self.model.attributes));
+	        utils.loadings.hideLeftLoading();
+	    }
+	});
+
+	let UserProfileView = Backbone.View.extend({
+	    el: '#home-right-panel',
+	    template: _.template(utils.secureElement($("#user-profile-template"))),
+	    initialize: function () {
+
+	    },
+	    render: function () {
+	        let self = this;
+	        this.$el.html(self.template(self.model.attributes));
+	        this.bindEvents();
+	    },
+	    bindEvents: function () {
+	        let self = this;
+	        $('.user-profile-edit-gender').iCheck({
+	            checkboxClass: 'icheckbox_square-blue',
+	            radioClass: 'iradio_square-blue',
+	            increaseArea: '20%' // optional
+	        });
+
+	        let genderDiv = $("#user-profile-edit-gender").find("input[value=" + self.model.get("cus_gender") + "]").iCheck("check");
+
+	        // Date picker
+	        // $('#user-profile-edit-bday').datepicker({
+	        //     autoclose: true
+	        // });
+
+	        // Phone mask
+	        $("#user-profile-edit-phone").inputmask();
+	        $("#user-profile-edit-bday").inputmask();
+
+	        $("#user-profile-edit-reset").click(function () {
+	            self.render();
+	        });
+
+	        $("#user-profile-edit-submit").click(function () {
+	            self.submitValidation();
+	        });
+	    },
+	    submitValidation: function () {
+	        let cus_name = $("#user-profile-edit-name"),
+	            cus_email = $("#user-profile-edit-email"),
+	            cus_age = $("#user-profile-edit-bday"),
+	            cus_phone = $("#user-profile-edit-phone"),
+	            cus_password_1 = $("#user-profile-edit-password-1"),
+	            cus_password_2 = $("#user-profile-edit-password-2"),
+	            cus_gender = $("#user-profile-edit-gender").find("input:checked");
+	        if (!utils.userNameValidate(cus_name.val()))
+	            cus_name.parent().addClass("has-error");
+	        else if (!utils.emailValidate(cus_email.val()))
+	            cus_email.parent().addClass("has-error");
+	        else if (!utils.ageValidate(cus_age.val()))
+	            cus_age.parent().addClass("has-error");
+	        else if (!utils.phoneValidate(cus_phone.val().replace(/\D/g, '')))
+	            cus_phone.parent().addClass("has-error");
+	        else if (!utils.genderValidate(cus_gender.val()))
+	            cus_gender.addClass("has-error");
+	        else if (cus_password_1.val() !== "" || cus_password_2.val() !== "") {
+	            if (!(cus_password_2.val().length === cus_password_1.val().length && cus_password_2.val().length >= 8 && cus_password_2.val().length <= 45)
+	                || cus_password_1.val() !== cus_password_2.val() || !utils.passwordValidate(cus_password_1.val())) {
+	                cus_password_1.parent().addClass("has-error");
+	                cus_password_2.parent().addClass("has-error");
+	            }
+	        } else {
+
+	        }
+	    },
+	    bindTrigger: function () {
+	        let self = this;
+	        $("#user-edit-profile-button").click(function () {
+	            self.render();
+	        });
+	    }
+	});
+
+	let TransactionView = Backbone.View.extend({});
+
 	let LoginMaskView = Backbone.View.extend({
 	    el: 'body',
 	    render: function () {
-	        var self = this;
+	        let self = this;
 	        if (!this.model.get("isLoggedIn")) {
 	            $.when(fetchTemplate("loginMask")).done(function (data) {
 	                self.template = _.template(data);
@@ -7944,7 +8003,7 @@
 	        }
 	    },
 	    bindEvents: function () {
-	        var self = this;
+	        let self = this;
 	        $(".ion-close-circled").on("click", function () {
 	            self.removeMask();
 	        });
@@ -7986,7 +8045,7 @@
 	        });
 	    },
 	    inputValidation: function () {
-	        var self = this;
+	        let self = this;
 	        if (!utils.emailValidate(self.model.get("cus_email"))) {
 	            $('#login-cus-email').css("border-color", _vars["--color-login-red"]);
 	            return false;
@@ -8271,11 +8330,12 @@
 	});
 
 	let RestaurantTypeView = Backbone.View.extend({
-	    el: '#restaurant-cuisine',
-	    template: _.template(utils.secureElement($("#restaurant-cuisine-template"))),
+	    el: '#home-left-panel',
+	    template: _.template(utils.secureElement($("#restaurant-filter-template"))),
 	    render: function () {
 	        let self = this;
-	        this.$el.html(this.template({list: self.model.attributes}));
+	        utils.loadings.hideLeftLoading();
+	        this.$el.append(this.template({list: self.model.attributes}));
 	        this.renderElements();
 	    },
 	    renderElements: function () {
@@ -8285,16 +8345,61 @@
 	            radioClass: 'iradio_square-blue',
 	            increaseArea: '20%' // optional
 	        });
+	        // delivery-time-range
+	        $("#delivery-time-range").ionRangeSlider({
+	            min: 15,
+	            max: 120,
+	            from: 30,
+	            to: 60,
+	            step: 15,
+	            type: 'double',
+	            min_interval: 15,
+	            postfix: ' min.',
+	            grid: true,
+	            grid_num: 7,
+	            input_values_separator: ";"
+	        });
+	        // avg-price-range
+	        $("#avg-price-range").ionRangeSlider({
+	            min: 5,
+	            max: 105,
+	            from: 10,
+	            to: 30,
+	            step: 5,
+	            type: 'double',
+	            min_interval: 5,
+	            prefix: '$',
+	            grid: true,
+	            grid_num: 10,
+	            input_values_separator: ";"
+	        });
+	        // rating-range
+	        $("#rating-range").ionRangeSlider({
+	            min: 0,
+	            max: 5,
+	            from: 4,
+	            to: 5,
+	            step: 1,
+	            type: 'double',
+	            min_interval: 1,
+	            grid: false,
+	            input_values_separator: ";"
+	        });
 	    }
 	});
 
 	let RestaurantSearchResultView = Backbone.View.extend({
-	    el: '#restaurant-search-result',
+	    el: '#home-right-panel',
 	    template: _.template(utils.secureElement($("#restaurant-search-result-template"))),
+	    initialize: function () {
+	        this.render();
+	    },
 	    render: function () {
-	        this.$el.html(this.template({restaurants: this.model.models.map(function (restaurant) {
-	            return restaurant.attributes;
-	        })}));
+	        this.$el.html(this.template({
+	            restaurants: this.model.models.map(function (restaurant) {
+	                return restaurant.attributes;
+	            })
+	        }));
 	    }
 	});
 
@@ -8308,12 +8413,22 @@
 	    });
 	}
 
+	function removeBeforeAppend() {
+	    let root = $("#home-left-panel"),
+	        offspring = root.children();
+	    for (let i = 1; i < offspring.length; i++) {
+	        $(offspring[i]).remove();
+	    }
+	}
+
 	module.exports = {
-	    CustomerBadgeView: CustomerBadgeView,
+	    UserBadgeView: UserBadgeView,
 	    LoginMaskView: LoginMaskView,
 	    RegisterMaskView: RegisterMaskView,
 	    RestaurantTypeView: RestaurantTypeView,
-	    RestaurantSearchResultView: RestaurantSearchResultView
+	    RestaurantSearchResultView: RestaurantSearchResultView,
+	    UserProfileSummaryView: UserProfileSummaryView,
+	    UserProfileView: UserProfileView
 	};
 
 /***/ },
@@ -10294,6 +10409,14 @@
 	        warning: "<i class='fa fa-bell-o' style='color:#f39c12'></i>",
 	        error: "<i class='fa fa-times-circle-o' style='color:#dd4b39'></i>",
 	        overlayIcon: "<div class='overlay'><i class='fa fa-refresh fa-spin'></i></div>"
+	    },
+	    loadings:{
+	        hideLeftLoading:function () {
+	            $("#left-panel-loading-box").hide();
+	        },
+	        showLeftLoading:function () {
+	            $("#left-panel-loading-box").show();
+	        }
 	    }
 	};
 
@@ -10805,7 +10928,7 @@
 	    },
 	    validationError: "",
 	    validate: function () {
-	        var self = this;
+	        let self = this;
 	        let errMsg = "";
 	        if (!utils.emailValidate(self.attributes.cus_email)) {
 	            errMsg = "invalid email.";
@@ -10844,7 +10967,8 @@
 	        res_type: "",
 	        avg_price: "10,30",
 	        res_rating: "4,5",
-	        res_delivery_time: "30,60"
+	        res_delivery_time: "30,60",
+	        search_text: ""
 	    },
 	    initialize: function () {
 
@@ -10860,9 +10984,9 @@
 	        this.bindUpdateAvgPrice();
 	        this.bindUpdateRating();
 	        this.bindUpdateDeliveryTime();
+	        this.bindSearchText();
 	    },
 	    bindUpdateType: function () {
-
 	        let tempResType = "";
 	        $("#restaurant-cuisine .icheckbox_square-blue").map(function (idx, element) {
 	            let e = $(element);
@@ -10871,6 +10995,17 @@
 	            }
 	        });
 	        this.set("res_type", tempResType);
+	    },
+	    bindSearchText: function () {
+	        let self = this,
+	            input = $("#restaurant-search-text"),
+	            button = input.parent().find("button");
+	        input.on("mouseup", function () {
+	            self.set("search_text", input.val());
+	        });
+	        button.click(function () {
+	            self.set("search_text", input.val());
+	        });
 	    },
 	    bindUpdateAvgPrice: function () {
 	        this.updateRange("avg_price", "#avg-price-range");
@@ -10972,6 +11107,7 @@
 	            dataType: 'json'
 	        })).done(function (data) {
 	            self.set(data.results, {reset: true});
+	            self.trigger("change");
 	        }).fail(function (xhr, textStatus) {
 	            console.log(xhr.status);
 	        });

@@ -6,7 +6,7 @@
 /*
  *Filters
  */
-#side-filter .box-body {
+#side-filter {
     margin-top: -30px;
 }
 
@@ -20,7 +20,7 @@
 /*
  * search-result
  */
-#restaurant-search-result {
+#restaurant-search-table {
     min-height: 645px;
 }
 
