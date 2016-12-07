@@ -135,9 +135,15 @@ public class CustomerService {
         get("/logStatus", (request, response) -> {
             HashMap<String, Object> attributes = new HashMap<>();
             Session session = request.session(true);
-            if (session.attribute("customer") != null) {
-                attributes.put("customer", session.attribute("customer"));
-            }
+            // business logic
+//            if (session.attribute("customer") != null) {
+//                attributes.put("customer", session.attribute("customer"));
+//            }
+            // create log in status for test only
+            Customer mockCustomer = new Customer(29, "test_let_us_use_a_long_name", "123@#123", "male", 16, "1@1.com", "135 N Bellefield Ave, Unit 403, Pittsburgh PA 15213", "4124270607");
+            session.attribute("customer", mockCustomer);
+            attributes.put("customer", session.attribute("customer"));
+
             return gson.toJson(attributes);
         });
 

@@ -37,38 +37,281 @@
 </head>
 
 <body class="hold-transition skin-blue layout-top-nav">
-<script type="text/template" id="restaurant-cuisine-template">
-    <div class="checkbox icheck">
-        <% _.each(list, function(value, key){ %>
-        <label style="margin-bottom: 10px;">
-            <input type="checkbox" id="dish-cuisine-<%= key.toLowerCase().replace(' ', '-') %>" class="restaurant-cuisine-icheck" value="<%=key%>"> &nbsp;<%=key%>
-            - (<%= value %>)
-        </label>
-        <br>
-        <% }); %>
+<script type="text/template" id="user-badge-template">
+    <a href='#' class='dropdown-toggle' data-toggle='dropdown'>
+        <!-- The user image in the navbar-->
+        <img src='<%=cus_img%>-128x128.jpg' class='user-image' alt='User Image'>
+        <!-- hidden-xs hides the username on small devices so only the image appears. -->
+        <span class='hidden-xs'><%=cus_name%></span>
+    </a>
+    <ul class='dropdown-menu'>
+        <!-- The user image in the menu -->
+        <li class='user-header'>
+            <img src='<%=cus_img%>-160x160.jpg' class='img-circle' alt='User Image'>
+            <p>
+                <%=cus_name%>
+                <small><%=cus_address%></small>
+            </p>
+        </li>
+        <!-- Menu Body -->
+        <li class='user-body'>
+            <div class='row'>
+                <div class='col-xs-6 text-center'>
+                    <a href='#'>My Orders</a>
+                </div>
+                <div class='col-xs-6 text-center'>
+                    <a href='#'>My Favorites</a>
+                </div>
+            </div>
+            <!-- /.row -->
+        </li>
+        <!-- Menu Footer-->
+        <li class='user-footer'>
+            <div id="user-profile-button" class='pull-left'>
+                <a class='btn btn-default btn-flat'>Profile</a>
+            </div>
+            <div id='logout-button' class='pull-right'>
+                <a href='' class='btn btn-default btn-flat'>Sign out</a>
+            </div>
+        </li>
+    </ul>
+</script>
+<script type="text/template" id="user-profile-summary-template">
+    <div class="box box-primary">
+        <div class="box-body box-profile">
+            <img class="profile-user-img img-responsive img-circle" src='<%=cus_img%>-160x160.jpg'
+                 alt="User profile picture" data-pin-nopin="true">
+
+            <h3 class="profile-username text-center"><%= cus_name %></h3>
+
+            <p class="text-muted text-center"><%= cus_address %></p>
+
+            <ul class="list-group list-group-unbordered">
+                <li class="list-group-item">
+                    <b>Email</b> <a class="pull-right"><%= cus_email %></a>
+                </li>
+                <li class="list-group-item">
+                    <b>Phone</b> <a class="pull-right"><%= cus_phone %></a>
+                </li>
+            </ul>
+            <div>
+                <button id="user-edit-profile-button" type="button" class="btn btn-block btn-flat btn-default">Edit Profile</button>
+                <button id="user-order-history-button" type="button" class="btn btn-block btn-flat btn-default">My Orders</button>
+                <button id="user-delete-account-button" type="button" class="btn btn-block btn-flat btn-danger">Delete Account</button>
+            </div>
+        </div>
+        <!-- /.box-body -->
     </div>
 </script>
+<script type="text/template" id="user-profile-template">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">Edit Profile</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="form-group">
+                <label for="user-profile-edit-name">Name</label>
+                <input type="text" class="form-control" id="user-profile-edit-name" value="<%= cus_name %>" placeholder="Enter Username...">
+            </div>
+            <div class="form-group">
+                <label for="user-profile-edit-email">Email Address</label>
+                <input type="email" class="form-control" id="user-profile-edit-email" value="<%= cus_email %>" placeholder="Enter Email...">
+            </div>
+            <div class="form-group">
+                <label for="user-profile-edit-bday">Age</label>
+                <input type="text" class="form-control pull-right" id="user-profile-edit-bday" data-inputmask='"numeric": "9"' data-mask value="<%= cus_age %>" placeholder="Enter Age...">
+            </div>
+            <div class="form-group">
+                <label for="user-profile-edit-address">Delivery Address</label>
+                <input type="text" class="form-control" id="user-profile-edit-address" value="<%= cus_address %>" placeholder="Enter Address...">
+            </div>
+            <div class="form-group">
+                <label for="user-profile-edit-phone">Phone Number</label>
+                <input type="text" class="form-control" id="user-profile-edit-phone"
+                       data-inputmask='"mask": "(999) 999-9999"' data-mask value="<%= cus_phone %>" placeholder="Enter Phone Number...">
+            </div>
+            <div id="user-profile-edit-gender" class="form-group">
+                <label>Gender</label>
+                <br>
+                <div class="col-xs-4">
+                    <label for="radio-male">
+                        <input type="radio" id="radio-male" value="male" class="user-profile-edit-gender" name="iCheck">
+                        Male
+                    </label>
+                </div>
+                <div class="col-xs-4">
+                    <label for="radio-female">
+                        <input type="radio" id="radio-female" value="female" class="user-profile-edit-gender"
+                               name="iCheck">
+                        Female
+                    </label>
+                </div>
+                <div class="col-xs-4">
+                    <label for="radio-unknown">
+                        <input type="radio" id="radio-unknown" value="unknown" class="user-profile-edit-gender"
+                               name="iCheck">
+                        Don't tell
+                    </label>
+                </div>
+            </div>
+            <hr>
+            <div class="form-group">
+                <label for="user-profile-edit-password-1">Password</label>
+                <input type="password" class="form-control" id="user-profile-edit-password-1"
+                       placeholder="Enter password...">
+                <br>
+                <input type="password" class="form-control" id="user-profile-edit-password-2"
+                       placeholder="Confirm password...">
+            </div>
+            <hr>
+            <div class="form-group">
+                <label for="user-profile-edit-avatar">Avatar</label>
+                <input class="btn btn-block btn-flat btn-default" type="file" id="user-profile-edit-avatar">
+
+                <p class="help-block">Upload your avatar.</p>
+            </div>
+        </div>
+        <!-- /.box-body -->
+
+        <div class="box-footer">
+            <button id="user-profile-edit-reset" type="button" class="btn btn-default pull-left">Reset</button>
+            <button id="user-profile-edit-submit" type="submit" class="btn btn-primary pull-right">Submit</button>
+        </div>
+    </div>
+</script>
+<script type="text/template" id="restaurant-filter-template">
+    <div class="box box-primary">
+        <div class="box-header">
+            <h3 class="box-title">Restaurant Filter</h3>
+        </div>
+        <!-- /.box-header -->
+        <div id="side-filter" class="box-body">
+            <div class="row margin">
+                <h4>Cuisine</h4>
+                <div id="restaurant-cuisine" class="col-sm-12">
+                    <div class="checkbox icheck">
+                        <% _.each(list, function(value, key){ %>
+                        <label style="margin-bottom: 10px;">
+                            <input type="checkbox" id="dish-cuisine-<%= key.toLowerCase().replace(' ', '-') %>"
+                                   class="restaurant-cuisine-icheck" value="<%=key%>"> &nbsp;<%=key%>
+                            - (<%= value %>)
+                        </label>
+                        <br>
+                        <% }); %>
+                    </div>
+                </div>
+                <br>
+                <h4>Average Price</h4>
+                <div class="col-sm-12">
+                    <input id="avg-price-range" type="text" name="avg-price-range"
+                           class="irs-hidden-input hidden-range" readonly="">
+                </div>
+                <br>
+                <h4>Rating</h4>
+                <div class="col-sm-12">
+                    <input id="rating-range" type="text" name="rating-range"
+                           class="irs-hidden-input hidden-range" readonly="">
+                </div>
+                <br>
+                <h4>Delivery Time</h4>
+                <div class="col-sm-12">
+                    <input id="delivery-time-range" type="text" name="delivery-time-range"
+                           class="irs-hidden-input hidden-range" readonly="">
+                </div>
+                <br>
+            </div>
+        </div>
+        <!-- /.box-body -->
+    </div>
+</script>
+<!-- tables -->
 <script type="text/template" id="restaurant-search-result-template">
-    <table class="table table-hover">
-        <tbody>
-        <tr>
-            <th>Restaurant</th>
-            <th>Cuisine</th>
-            <th>Rating</th>
-            <th>Average Price</th>
-            <th>Delivery Time</th>
-        </tr>
-        <% _.each(restaurants, function(restaurant, index, list){ %>
-        <tr>
-            <td><%= restaurant.res_name %></td>
-            <td><%= restaurant.res_type %></td>
-            <td><span class="label label-<%= restaurant.res_rating<2?'danger':restaurant.res_rating<4?'warning':'success' %>"><%= restaurant.res_rating %></span></td>
-            <td>$<%= Math.round(restaurant.res_avg_price*100)/100 %></td>
-            <td><%= restaurant.res_delivery_time %> min</td>
-        </tr>
-        <% }); %>
-        </tbody>
-    </table>
+    <div class="box box-info">
+        <div class="box-header">
+            <h3 class="box-title">Restaurants</h3>
+            <div class="box-tools">
+                <div class="input-group input-group-sm" style="width: 150px;">
+                    <input type="text" name="table_search" id="restaurant-search-text" class="form-control pull-right"
+                           placeholder="Search">
+                    <div class="input-group-btn">
+                        <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div id="restaurant-search-table" class="box-body table-responsive no-padding">
+            <table class="table table-hover">
+                <tbody>
+                <tr>
+                    <th>Restaurant</th>
+                    <th>Cuisine</th>
+                    <th>Rating</th>
+                    <th>Average Price</th>
+                    <th>Delivery Time</th>
+                </tr>
+                <% _.each(restaurants, function(restaurant, index, list){ %>
+                <tr>
+                    <td><%= restaurant.res_name %></td>
+                    <td><%= restaurant.res_type %></td>
+                    <td><span
+                            class="label label-<%= restaurant.res_rating<2?'danger':restaurant.res_rating<4?'warning':'success' %>"><%= restaurant.res_rating %></span>
+                    </td>
+                    <td>$<%= Math.round(restaurant.res_avg_price*100)/100 %></td>
+                    <td><%= restaurant.res_delivery_time %> min</td>
+                </tr>
+                <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <!-- /.box-body -->
+    </div>
+</script>
+<script type="text/template" id="user-transaction-template">
+    <div class="box box-info">
+        <div class="box-header">
+            <h3 class="box-title">Transactions</h3>
+            <div class="box-tools">
+                <div class="input-group input-group-sm" style="width: 150px;">
+                    <input type="text" name="table_search" id="user-transaction-search-text"
+                           class="form-control pull-right"
+                           placeholder="Search">
+                    <div class="input-group-btn">
+                        <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div id="user-transaction-search-table" class="box-body table-responsive no-padding">
+            <table class="table table-hover">
+                <tbody>
+                <tr>
+                    <th>Restaurant</th>
+                    <th>Cuisine</th>
+                    <th>Rating</th>
+                    <th>Average Price</th>
+                    <th>Delivery Time</th>
+                </tr>
+                <% _.each(restaurants, function(restaurant, index, list){ %>
+                <tr>
+                    <td><%= restaurant.res_name %></td>
+                    <td><%= restaurant.res_type %></td>
+                    <td><span
+                            class="label label-<%= restaurant.res_rating<2?'danger':restaurant.res_rating<4?'warning':'success' %>"><%= restaurant.res_rating %></span>
+                    </td>
+                    <td>$<%= Math.round(restaurant.res_avg_price*100)/100 %></td>
+                    <td><%= restaurant.res_delivery_time %> min</td>
+                </tr>
+                <% }); %>
+                </tbody>
+            </table>
+        </div>
+        <!-- /.box-body -->
+    </div>
 </script>
 <div class="wrapper">
     <header class="main-header">
@@ -148,7 +391,7 @@
                                     class="label label-danger">9</span></a>
                         </li>
                         <!-- User Account Menu -->
-                        <li id="customer-badge" class="dropdown user user-menu">
+                        <li id="user-badge" class="dropdown user user-menu">
                         </li>
                         <li id="login-button" class="dropdown login-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="display: block;"
@@ -174,66 +417,26 @@
             <!-- Main content -->
             <section class="content">
                 <div id="restaurant-filter" class="row">
-                    <div id="side-filter" class="col-xs-4">
-                        <div class="box box-primary">
+                    <div id="home-left-panel" class="col-xs-4">
+                        <div id="left-panel-loading-box" class="box box-primary">
                             <div class="box-header">
-                                <h3 class="box-title">Restaurant Filter</h3>
+                                <h3 class="box-title">Loading ...</h3>
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body">
                                 <div class="row margin">
-                                    <h4>Cuisine</h4>
-                                    <div id="restaurant-cuisine" class="col-sm-12">
-                                        <div class="overlay">
-                                            <i class="fa fa-refresh fa-spin"></i>
-                                        </div>
+                                    <div class="overlay">
+                                        <i class="fa fa-refresh fa-spin"></i>
                                     </div>
-                                    <br>
-                                    <h4>Average Price</h4>
-                                    <div class="col-sm-12">
-                                        <input id="avg-price-range" type="text" name="avg-price-range"
-                                               class="irs-hidden-input hidden-range" readonly="">
-                                    </div>
-                                    <br>
-                                    <h4>Rating</h4>
-                                    <div class="col-sm-12">
-                                        <input id="rating-range" type="text" name="rating-range"
-                                               class="irs-hidden-input hidden-range" readonly="">
-                                    </div>
-                                    <br>
-                                    <h4>Delivery Time</h4>
-                                    <div class="col-sm-12">
-                                        <input id="delivery-time-range" type="text" name="delivery-time-range"
-                                               class="irs-hidden-input hidden-range" readonly="">
-                                    </div>
+
                                     <br>
                                 </div>
                             </div>
                             <!-- /.box-body -->
                         </div>
                     </div>
-                    <div class="col-xs-8">
-                        <div class="box box-info">
-                            <div class="box-header">
-                                <h3 class="box-title">Restaurants</h3>
-                                <div class="box-tools">
-                                    <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" name="table_search" class="form-control pull-right"
-                                               placeholder="Search">
-                                        <div class="input-group-btn">
-                                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- /.box-header -->
-                            <div id="restaurant-search-result" class="box-body table-responsive no-padding">
+                    <div id="home-right-panel" class="col-xs-8">
 
-                            </div>
-                            <!-- /.box-body -->
-                        </div>
-                        <!-- /.box -->
                     </div>
                 </div>
             </section>
@@ -258,7 +461,7 @@
     </aside>
     <!-- The sidebar's background -->
     <!-- This div must placed right after the sidebar for it to work-->
-    <div class="control-sidebar-bg"></div>
+    <div id="shopping-cart" class="control-sidebar-bg"></div>
 </div>
 <!-- ./wrapper -->
 <!-- REQUIRED JS SCRIPTS -->
