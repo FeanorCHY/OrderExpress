@@ -23,6 +23,14 @@ public class Dish {
         this.price = price;
         this.stock = stock;
     }
+    
+    public Dish(int id, String name, String description, String path, float price) {
+        this.dis_id = id;
+        this.dish_name = name;
+        this.description = description;
+        this.pic_path = path;
+        this.price = price;
+    }
 
     public int getDis_id() {
         return dis_id;

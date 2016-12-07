@@ -33,7 +33,7 @@ public class HostService {
         SearchService searchService = new SearchService(daoFactory.getRestaurantDao(), daoFactory.getDishDao());
         searchService.startService();
 
-        TransactionService transactionService = new TransactionService();
+        TransactionService transactionService = new TransactionService(daoFactory.getTransactionDao());
         transactionService.startService();
 
         HomeService homeService = new HomeService(daoFactory.getRestaurantDao());

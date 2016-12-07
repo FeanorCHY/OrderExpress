@@ -29,4 +29,6 @@ public class DaoFactory {
     public RestaurantDao getRestaurantDao() {return new RestaurantDao(driver);}
 
     public DishDao getDishDao() {return new DishDao(driver);}
+    
+    public TransactionDao getTransactionDao() {return new TransactionDao(driver);}
 }
