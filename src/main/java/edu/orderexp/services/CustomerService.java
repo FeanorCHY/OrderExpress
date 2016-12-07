@@ -27,7 +27,7 @@ public class CustomerService {
     public void startService() {
         /* ---------------- User ---------------- */
         // register
-        post("/register", (request, response) -> {
+        post("/user/register", (request, response) -> {
             // http://stackoverflow.com/questions/17742633/how-read-data-sent-by-client-with-spark
             HashMap<String, Object> attributes = new HashMap<>();
             Session session = request.session(true);
@@ -98,15 +98,15 @@ public class CustomerService {
         put("/user/:cus_id", (request, response) -> {
         	HashMap<String, Object> attributes = new HashMap<>();
         	Session session = request.session(true);
-        	
+        	// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
             customer = fromJson(request.body(), Customer.class);
-            int cus_id = Integer.parseInt(request.params("cus_id"));
+            int cus_id = Integer.parseInt(request.params(":cus_id"));
         	boolean updateSuccess = cd.updateById(cus_id, customer);
 
             if(updateSuccess) {
             	session.attribute("customer", customer);
             	attributes.put("customer", customer);
-            	attributes.put("statusMsg", "Profile update success");
+            	attributes.put("statusMsg", "Profile update succeed.");
             	logger.info(customer.getCus_email() + " update profile.");
             } else {
             	response.status(403); //forbidden
@@ -136,13 +136,13 @@ public class CustomerService {
             HashMap<String, Object> attributes = new HashMap<>();
             Session session = request.session(true);
             // business logic
-//            if (session.attribute("customer") != null) {
-//                attributes.put("customer", session.attribute("customer"));
-//            }
+            if (session.attribute("customer") != null) {
+                attributes.put("customer", session.attribute("customer"));
+            }
             // create log in status for test only
-            Customer mockCustomer = new Customer(29, "test_let_us_use_a_long_name", "123@#123", "male", 16, "1@1.com", "135 N Bellefield Ave, Unit 403, Pittsburgh PA 15213", "4124270607");
-            session.attribute("customer", mockCustomer);
-            attributes.put("customer", session.attribute("customer"));
+//            Customer mockCustomer = new Customer(29, "test_let_us_use_a_long_name", "123@#123", "male", 16, "1@1.com", "135 N Bellefield Ave, Unit 403, Pittsburgh PA 15213", "4124270607");
+//            session.attribute("customer", mockCustomer);
+//            attributes.put("customer", session.attribute("customer"));
 
             return gson.toJson(attributes);
         });

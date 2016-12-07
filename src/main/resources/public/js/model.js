@@ -6,7 +6,13 @@ let utils = require('./utils');
 const default_img_path_without_suffix = "../img/user-default";
 
 let Customer = Backbone.Model.extend({
-    url: "register",
+    url: function () {
+        let base = "/user";
+        if (this.isNew()) {
+            return base + "/register";
+        }
+        return utils.slash(base) + this.id;
+    },
     default: {
         isLoggedIn: false
     },
@@ -33,6 +39,7 @@ let Customer = Backbone.Model.extend({
     },
     parseWith: function (customer) {
         this.set({
+            id:customer.cus_id,
             cus_id: customer.cus_id,
             cus_name: customer.cus_name,
             cus_password: customer.cus_password,
@@ -132,7 +139,7 @@ let RestaurantTypeModel = Backbone.Model.extend({
         let self = this;
         this.fetch({
             success: function (model, response, options) {
-                this.model = model;
+                self.model = model;
             },
             error: function (model, response, options) {
             }

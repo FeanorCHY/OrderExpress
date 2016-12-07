@@ -10,15 +10,19 @@ require("ion-rangeslider");
 require("../lib/AdminLTE/plugins/input-mask/jquery.inputmask.js");
 require("../lib/AdminLTE/plugins/input-mask/jquery.inputmask.phone.extensions.js");
 let _ = require('underscore');
+let Backbone = require('backbone');
+Backbone.$ = $;
 let View = require('./view.js');
 let Model = require('./model.js');
 let Collection = require('./collection.js');
+let Router = require('./router.js');
 let utils = require('./utils');
 let _vars = require('!css-variables!../css/variables.css');
 
 $(document).ready(function () {
     console.log(window.location.href);
     loadDOMElements();
+    let AppRouter = new Router.AppRouter();
     let customerModel = new Model.Customer();
     let userBadgeView = new View.UserBadgeView({
         model: customerModel
@@ -29,15 +33,12 @@ $(document).ready(function () {
     let userProfileView = new View.UserProfileView({
         model: customerModel
     });
+    let userTransactionView = new View.UserTransactionView();
+    // userTransactionView.render();
     customerModel.on("change", function () {
-        if (customerModel.hasChanged("isLoggedIn")) {
-            userBadgeView.render();
-            if (customerModel.get("isLoggedIn")) {
-                $("#user-profile-button").click(function () {
-                    userProfileSummaryView.render();
-                    userProfileView.bindTrigger();
-                });
-            }
+        userBadgeView.render();
+        if (customerModel.get("isLoggedIn")) {
+            userProfileSummaryView.render();
         }
     });
     checkLogStatus(customerModel);
@@ -54,11 +55,6 @@ $(document).ready(function () {
     let restaurantTypeView = new View.RestaurantTypeView({
         model: restaurantTypeModel
     });
-    restaurantTypeModel.on("change", function () {
-        restaurantTypeView.render();
-        restaurantFilterModel.bindEvents();
-    });
-    restaurantTypeModel.fetchData();
 
     let rsrCollection = new Collection.RestaurantSearchResultCollection();
     let rsrView = new View.RestaurantSearchResultView({
@@ -66,6 +62,7 @@ $(document).ready(function () {
     });
     rsrCollection.on("change", function () {
         rsrView.render();
+        restaurantFilterModel.bindSearchText();
     });
     restaurantFilterModel.on("change", function () {
         $("#restaurant-search-table").html(utils.ui.overlayIcon);
@@ -76,6 +73,39 @@ $(document).ready(function () {
     $('#login-button').on("click", function () {
         loginMaskView.render();
     });
+
+    AppRouter.on('route:profile', function (cus_id) {
+        $("section.content-header").find("h1").html("Profile<small>And we deliver your favorite food!</small>");
+        $("#home-left-panel").find(".box").hide();
+        $("#home-right-panel").find(".box").hide();
+        userProfileSummaryView.render();
+        // userTransactionView.render();
+        userProfileSummaryView.$el.show();
+        userTransactionView.$el.show();
+    });
+    AppRouter.on('route:editProfile', function (cus_id) {
+        $("section.content-header").find("h1").html("Profile<small>And we deliver your favorite food!</small>");
+        $("#home-right-panel").find(".box").hide();
+        userProfileSummaryView.render();
+        userProfileView.render();
+        userProfileView.$el.show();
+    });
+    AppRouter.on('route:home', function () {
+        $("section.content-header").find("h1").html("Pick a Restaurant<small>And we deliver your favorite food!</small>");
+        $("#home-left-panel").find(".box").hide();
+        $("#home-right-panel").find(".box").hide();
+        restaurantTypeModel.fetchData();
+        restaurantTypeModel.on("change", function () {
+            restaurantTypeView.render();
+            restaurantFilterModel.bindEvents();
+            rsrView.render();
+            restaurantFilterModel.bindSearchText();
+            restaurantTypeView.$el.show();
+            rsrView.$el.show();
+        });
+    });
+    Backbone.history.start();
+    AppRouter.navigate("");
 });
 
 function loadDOMElements() {

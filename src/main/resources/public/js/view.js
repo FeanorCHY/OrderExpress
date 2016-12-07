@@ -4,6 +4,7 @@ let Backbone = require('backbone');
 Backbone.$ = $;
 let _vars = require('!css-variables!../css/variables.css');
 let utils = require('./utils');
+let Model = require('./model.js');
 const __templateRoot = "../templates/";
 require('../lib/AdminLTE/plugins/iCheck/icheck');
 
@@ -35,21 +36,21 @@ let UserBadgeView = Backbone.View.extend({
 });
 
 let UserProfileSummaryView = Backbone.View.extend({
-    el: '#home-left-panel',
+    el: '#user-profile-summary-container',
     template: _.template(utils.secureElement($("#user-profile-summary-template"))),
     initialize: function () {
     },
     render: function () {
         utils.loadings.showLeftLoading();
         let self = this;
-        removeBeforeAppend();
-        this.$el.append(self.template(self.model.attributes));
+        // removeBeforeAppend();
+        this.$el.html(self.template(self.model.attributes));
         utils.loadings.hideLeftLoading();
     }
 });
 
 let UserProfileView = Backbone.View.extend({
-    el: '#home-right-panel',
+    el: '#user-profile-container',
     template: _.template(utils.secureElement($("#user-profile-template"))),
     initialize: function () {
 
@@ -67,7 +68,7 @@ let UserProfileView = Backbone.View.extend({
             increaseArea: '20%' // optional
         });
 
-        let genderDiv = $("#user-profile-edit-gender").find("input[value=" + self.model.get("cus_gender") + "]").iCheck("check");
+        $("#user-profile-edit-gender").find("input[value=" + self.model.get("cus_gender") + "]").iCheck("check");
 
         // Date picker
         // $('#user-profile-edit-bday').datepicker({
@@ -83,36 +84,82 @@ let UserProfileView = Backbone.View.extend({
         });
 
         $("#user-profile-edit-submit").click(function () {
-            self.submitValidation();
+            if (self.submitValidation()) {
+                let updated = {
+                    cus_name: $("#user-profile-edit-name").val(),
+                    cus_email: $("#user-profile-edit-email").val(),
+                    cus_age: $("#user-profile-edit-bday").val(),
+                    cus_phone: $("#user-profile-edit-phone").val().replace(/\D/g, ''),
+                    cus_password: $("#user-profile-edit-password-1").val(),
+                    cus_gender: $("#user-profile-edit-gender").find("input:checked").val()
+                };
+                self.model.save(updated, {
+                    success: function (model) {
+                        self.model.parseWith(model.attributes);
+                        self.model.trigger("change");
+                        window.location.hash = "#user/" + self.model.get("cus_id");
+                    }, error: function () {
+
+                    }
+                });
+            }
+
         });
     },
     submitValidation: function () {
-        let cus_name = $("#user-profile-edit-name"),
+        let flag = true,
+            cus_name = $("#user-profile-edit-name"),
             cus_email = $("#user-profile-edit-email"),
             cus_age = $("#user-profile-edit-bday"),
             cus_phone = $("#user-profile-edit-phone"),
             cus_password_1 = $("#user-profile-edit-password-1"),
             cus_password_2 = $("#user-profile-edit-password-2"),
             cus_gender = $("#user-profile-edit-gender").find("input:checked");
-        if (!utils.userNameValidate(cus_name.val()))
+        if (!utils.userNameValidate(cus_name.val())) {
             cus_name.parent().addClass("has-error");
-        else if (!utils.emailValidate(cus_email.val()))
+            flag = false;
+        } else {
+            cus_name.parent().removeClass("has-error");
+        }
+        if (!utils.emailValidate(cus_email.val())) {
             cus_email.parent().addClass("has-error");
-        else if (!utils.ageValidate(cus_age.val()))
+            flag = false;
+        } else {
+            cus_email.parent().removeClass("has-error");
+        }
+        if (!utils.ageValidate(cus_age.val())) {
             cus_age.parent().addClass("has-error");
-        else if (!utils.phoneValidate(cus_phone.val().replace(/\D/g, '')))
+            flag = false;
+        } else {
+            cus_age.parent().removeClass("has-error");
+        }
+        if (!utils.phoneValidate(cus_phone.val().replace(/\D/g, ''))) {
             cus_phone.parent().addClass("has-error");
-        else if (!utils.genderValidate(cus_gender.val()))
+            flag = false;
+        } else {
+            cus_phone.parent().removeClass("has-error");
+        }
+        if (!utils.genderValidate(cus_gender.val())) {
             cus_gender.addClass("has-error");
-        else if (cus_password_1.val() !== "" || cus_password_2.val() !== "") {
-            if (!(cus_password_2.val().length === cus_password_1.val().length && cus_password_2.val().length >= 8 && cus_password_2.val().length <= 45)
-                || cus_password_1.val() !== cus_password_2.val() || !utils.passwordValidate(cus_password_1.val())) {
+            flag = false;
+        } else {
+            cus_gender.removeClass("has-error");
+        }
+        if (cus_password_1.val() !== "" || cus_password_2.val() !== "") {
+            if (!(cus_password_2.val().length === cus_password_1.val().length
+                && cus_password_2.val().length >= 8
+                && cus_password_2.val().length <= 45)
+                || cus_password_1.val() !== cus_password_2.val()
+                || !utils.passwordValidate(cus_password_1.val())) {
                 cus_password_1.parent().addClass("has-error");
                 cus_password_2.parent().addClass("has-error");
+                flag = false;
+            } else {
+                cus_password_1.parent().removeClass("has-error");
+                cus_password_2.parent().removeClass("has-error");
             }
-        } else {
-
         }
+        return flag;
     },
     bindTrigger: function () {
         let self = this;
@@ -122,7 +169,14 @@ let UserProfileView = Backbone.View.extend({
     }
 });
 
-let TransactionView = Backbone.View.extend({});
+let UserTransactionView = Backbone.View.extend({
+    el: "#user-transaction-container",
+    template: _.template(utils.secureElement($("#user-transaction-template"))),
+    render: function () {
+        let self = this;
+        this.$el.html(self.template());
+    }
+});
 
 let LoginMaskView = Backbone.View.extend({
     el: 'body',
@@ -422,7 +476,7 @@ let RegisterMaskView = Backbone.View.extend({
                 self.nowClear(emailContainer);
                 self.parseRegistration();
                 $.when($.post({
-                    url: '/register',
+                    url: '/user/register',
                     data: JSON.stringify(self.model.attributes),
                     dataType: 'json'
                 })).done(function (data) {
@@ -466,12 +520,13 @@ let RegisterMaskView = Backbone.View.extend({
 });
 
 let RestaurantTypeView = Backbone.View.extend({
-    el: '#home-left-panel',
+    el: '#restaurant-filter-container',
     template: _.template(utils.secureElement($("#restaurant-filter-template"))),
     render: function () {
         let self = this;
+        // removeBeforeAppend();
         utils.loadings.hideLeftLoading();
-        this.$el.append(this.template({list: self.model.attributes}));
+        this.$el.html(this.template({list: self.model.attributes}));
         this.renderElements();
     },
     renderElements: function () {
@@ -525,7 +580,7 @@ let RestaurantTypeView = Backbone.View.extend({
 });
 
 let RestaurantSearchResultView = Backbone.View.extend({
-    el: '#home-right-panel',
+    el: '#restaurant-search-result-container',
     template: _.template(utils.secureElement($("#restaurant-search-result-template"))),
     initialize: function () {
         this.render();
@@ -564,5 +619,6 @@ module.exports = {
     RestaurantTypeView: RestaurantTypeView,
     RestaurantSearchResultView: RestaurantSearchResultView,
     UserProfileSummaryView: UserProfileSummaryView,
-    UserProfileView: UserProfileView
+    UserProfileView: UserProfileView,
+    UserTransactionView: UserTransactionView
 };
