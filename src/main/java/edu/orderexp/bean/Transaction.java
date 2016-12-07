@@ -6,45 +6,44 @@ package edu.orderexp.bean;
  */
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Date;
 import java.util.Map;
-import org.apache.commons.lang.RandomStringUtils;
 import java.util.HashMap;
 
 public class Transaction {
-	
-	private static final int ID_LENGTH = 6; 
 
-	private String id;
-	private String cusId;
-	private java.sql.Date time;
+	private int id;
+	private int cusId;
+	private Date time;
 	private BigDecimal price;
 	private Map<Dish, Integer> dishes;	//Dish->Quantity
 	
 	public Transaction() {
-		java.util.Date utilDate = new Date();
-		time = new java.sql.Date(utilDate.getTime());
-		
+		time = new Date(System.currentTimeMillis());
 		dishes = new HashMap<Dish, Integer>();
 	}
+	
+	public Transaction(int id) {
+		this.id = id;
+		dishes = new HashMap<>();
+	}
 
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId() {
-		this.id = "tran_" + 
-				RandomStringUtils.randomAlphanumeric(ID_LENGTH);
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	/*
 	 * Get and set customer Id
 	 */
-	public String getCusId() {
+	public int getCusId() {
 		return cusId;
 	}
 
-	public void setCusId(String cusId) {
+	public void setCusId(int cusId) {
 		this.cusId = cusId;
 	}
 	
