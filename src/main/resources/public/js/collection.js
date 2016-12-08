@@ -24,10 +24,9 @@ let RestaurantSearchResultCollection = Backbone.Collection.extend({
 });
 
 let UserTransactionCollection = Backbone.Collection.extend({
-    url: "transaction/user/",
-    fetchData: function (customer) {
+    fetchData: function (cus_id) {
+        this.url = "/transaction/user/" + cus_id;
         let self = this;
-        this.url = this.url + customer.get("cus_id");
         $.when($.get({
             url: self.url,
             dataType: 'json'
@@ -45,5 +44,6 @@ let DishCollection = Backbone.Collection.extend({});
 
 module.exports = {
     RestaurantSearchResultCollection: RestaurantSearchResultCollection,
+    UserTransactionCollection: UserTransactionCollection,
     DishCollection: DishCollection
 };

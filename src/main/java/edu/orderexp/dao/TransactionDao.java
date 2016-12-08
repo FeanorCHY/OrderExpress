@@ -68,7 +68,7 @@ public class TransactionDao implements Dao<Transaction> {
     		}
     		
     		if(tran_id == -1) {
-    			logger.info(cus_id + "has no transaction records. ");
+    			logger.info(cus_id + " has no transaction records. ");
     			return null;
     		} else {
     			return new ArrayList(idToTrans.values());

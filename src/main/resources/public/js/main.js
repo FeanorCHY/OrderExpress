@@ -120,6 +120,10 @@ $(document).ready(function () {
             rsrView.$el.show();
         });
     });
+    AppRouter.on('route:fetchTransListByCusId', function (cus_id) {
+        let userTransactionCollection = new Collection.UserTransactionCollection( );
+        userTransactionCollection.fetchData(cus_id);
+    });
     Backbone.history.start();
     AppRouter.navigate("");
 });

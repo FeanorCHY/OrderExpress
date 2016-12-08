@@ -173,6 +173,7 @@ let DishModel = Backbone.Model.extend({
 });
 
 let UserTransactionModel = Backbone.Model.extend({
+    url:""
 });
 
 module.exports = {

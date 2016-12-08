@@ -166,6 +166,10 @@
 	            rsrView.$el.show();
 	        });
 	    });
+	    AppRouter.on('route:fetchTransListByCusId', function (cus_id) {
+	        let userTransactionCollection = new Collection.UserTransactionCollection( );
+	        userTransactionCollection.fetchData(cus_id);
+	    });
 	    Backbone.history.start();
 	    AppRouter.navigate("");
 	});
@@ -11192,6 +11196,7 @@
 	});
 
 	let UserTransactionModel = Backbone.Model.extend({
+	    url:""
 	});
 
 	module.exports = {
@@ -11232,10 +11237,9 @@
 	});
 
 	let UserTransactionCollection = Backbone.Collection.extend({
-	    url: "transaction/user/",
-	    fetchData: function (customer) {
+	    fetchData: function (cus_id) {
+	        this.url = "/transaction/user/" + cus_id;
 	        let self = this;
-	        this.url = this.url + customer.get("cus_id");
 	        $.when($.get({
 	            url: self.url,
 	            dataType: 'json'
@@ -11253,6 +11257,7 @@
 
 	module.exports = {
 	    RestaurantSearchResultCollection: RestaurantSearchResultCollection,
+	    UserTransactionCollection: UserTransactionCollection,
 	    DishCollection: DishCollection
 	};
 
@@ -11269,7 +11274,8 @@
 	    routes: {
 	        "": "home",
 	        "user/:cus_id": "profile",
-	        "user/:cus_id/edit": "editProfile"
+	        "user/:cus_id/edit": "editProfile",
+	        "transaction/user/:cus_id": "fetchTransListByCusId"
 	    },
 	    initialize:function () {
 
