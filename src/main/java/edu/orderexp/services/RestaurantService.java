@@ -2,7 +2,7 @@ package edu.orderexp.services;
 
 import com.google.gson.Gson;
 
-import edu.orderexp.bean.Customer;
+import edu.orderexp.bean.Dish;
 import edu.orderexp.bean.Restaurant;
 import edu.orderexp.dao.DishDao;
 import edu.orderexp.dao.RestaurantDao;
@@ -19,6 +19,8 @@ public class RestaurantService {
     final static Logger logger = Logger.getLogger(RestaurantService.class);
     private Restaurant restaurant;
     private RestaurantDao rd;
+    private Dish dish;
+    private DishDao dd;
     private Gson gson;
 
     public RestaurantService(RestaurantDao restaurantDao) {
@@ -118,14 +120,44 @@ public class RestaurantService {
             return gson.toJson(attributes);
         });
 
-        //add dish
-        post("/restaurant/:res_id/dish", (req, res) -> {
-            return "Hello: " + req.params(":id");
+        //add new dish
+        post("/restaurant/:res_id/dish", (request, response) -> {
+        	HashMap<String, Object> attributes = new HashMap<>();
+            //Session session = request.session(true);
+            
+            dish = fromJson(request.body(), Dish.class);
+            dish = dd.add(dish);
+            
+            if(dish != null) {
+            	attributes.put("dish", dish);
+            	attributes.put("statusMsg", "New dish add succeed. ");
+            	logger.info("Restaurant" + dish.getRest_id() + 
+            			" add a new dish \"" + dish.getDish_name() + "\" successfully. ");
+            } else {
+            	response.status(500); //no resource created
+            	attributes.put("statusMsg", "Add new dish failed. ");
+            }
+            
+        	return gson.toJson(attributes);
         });
 
-        //edit dish details
-        put("/restaurant/:res_id/:dish_id", (req, res) -> {
-            return "Hello: " + req.params(":id");
+        //update dish details
+        put("/restaurant/:res_id/:dish_id", (request, response) -> {
+        	HashMap<String, Object> attributes = new HashMap<>();
+        	int dish_id = Integer.parseInt(request.params("dish_id"));
+        	dish = fromJson(request.body(), Dish.class);
+        	
+        	boolean updateSuccess = dd.updateById(dish_id, dish);
+        	if(updateSuccess) {
+        		attributes.put("dish", dish);
+        		attributes.put("statusMsg", "Dish update succeed. ");
+        		logger.info("Dish \"" + dish.getDish_name() + "\" has been updated successfully. ");
+        	} else {
+        		response.status(403); //forbidden
+            	attributes.put("statusMsg", "Update failed.");
+        	}
+            
+        	return gson.toJson(attributes);
         });
 
         //delete dish
