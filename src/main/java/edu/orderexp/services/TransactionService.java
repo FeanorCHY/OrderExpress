@@ -1,7 +1,6 @@
 package edu.orderexp.services;
 
 import static spark.Spark.get;
-import static spark.Spark.put;
 import static spark.Spark.post;
 
 import java.util.List;
@@ -15,7 +14,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import edu.orderexp.bean.Dish;
 import edu.orderexp.bean.Restaurant;
 import edu.orderexp.bean.Transaction;
 import edu.orderexp.dao.TransactionDao;
@@ -47,7 +45,7 @@ public class TransactionService {
 		//get all transaction for user
 		get("/tranaction/user/:cus_id", (request, response) -> {
 			HashMap<String, Object> attributes = new HashMap<>();
-			Session session = request.session(true);
+			//Session session = request.session(true);
 			
 			int cus_id = Integer.parseInt(request.params("cus_id"));
 			List<Transaction> transactions = td.fetchAllbyCusId(cus_id);
@@ -90,30 +88,31 @@ public class TransactionService {
 		get("/transaction/:tran_id", (request, response) -> {
 			HashMap<String, Object> attributes = new HashMap<>();
 			int tran_id = Integer.parseInt(request.params("tran_id"));
-			Session session = request.session(true);
-	
-			if(transactions != null) {
-				Map<Dish, Integer> dishes = null;
+			//Session session = request.session(true);
+			
+			List<Map<String, Object>> details = td.fetchDetailbyTranId(tran_id);
+			
+			if(details != null) {
+				attributes.put("statusMsg", "Transaction details are fetched. ");
 				
-				for(Transaction t:transactions) {
-					if(t.getId() == tran_id) {
-						dishes = t.getDishes();
-						break;
-					}
+				JsonArray trans_detail = new JsonArray();
+				for(Map<String, Object> d:details) {
+					JsonObject metaObject = new JsonObject();
+					metaObject.addProperty("res_id", (int)d.get("res_id"));
+					metaObject.addProperty("res_name", d.get("res_name").toString());
+					metaObject.addProperty("dish_id", (int)d.get("dish_id"));
+					metaObject.addProperty("dish_name", d.get("dish_name").toString());
+					metaObject.addProperty("price", (float)d.get("price"));
+					metaObject.addProperty("pic_path", d.get("pit_path").toString());
+					metaObject.addProperty("quantity", (int)d.get("quantity"));
+					
+					trans_detail.add(metaObject);
 				}
 				
-				if(dishes != null) {
-					session.attribute("dishes", dishes);
-					attributes.put("dishes", dishes);
-					attributes.put("statusMsg", "Dishes retrieved successfully. ");
-					logger.info("Dishes in transaction" + tran_id + " are retrieved");
-				} else {
-					response.status(204); //no content
-					attributes.put("statusMsg", "Empty Transaction. ");
-				}			
+				attributes.put("trans_detail", trans_detail);
 			} else {
-				response.status(401); //session expired
-				attributes.put("statusMsg", "Transactions session has expired. ");
+				response.status(204); //no content
+				attributes.put("statusMsg", "No transaction details. ");
 			}
 			
 			return gson.toJson(attributes);

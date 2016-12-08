@@ -73,14 +73,41 @@ public class TransactionDao implements Dao<Transaction> {
 		}
     }
     
-    public List<Dish> fetchDetailbyTranId(int tran_id) {
+    public List<Map<String, Object>> fetchDetailbyTranId(int tran_id) {
     	Connection conn = driver.connect();
     	CallableStatement cs = null;
     	ResultSet rs = null;
-    	List<Dish> trans = new ArrayList<>();
+    	List<Map<String, Object>> details = new ArrayList<>();
     	
     	String query = "{CALL get_tran_detail_by_tran_id(?)}";
-    
+    	
+    	try {
+			cs = conn.prepareCall(query);
+			cs.setInt(1, tran_id);
+			rs = cs.executeQuery();
+			
+			while(rs.next()) {
+				Map<String, Object> d = new HashMap<>();
+				d.put("dish_id", rs.getInt("dish_id"));
+				d.put("dish_name", rs.getString("dish_name"));
+				d.put("price", rs.getFloat("price"));
+				d.put("pic_path", rs.getString("pic_path"));
+				d.put("quantity", rs.getInt("quantity"));
+				d.put("res_id", rs.getInt("res_id"));
+				d.put("res_name", rs.getString("res_name"));
+				
+				details.add(d);
+			}
+			
+			if (details == null || details.size() == 0) {
+				return null;
+			} else {
+				return details;
+			}
+		} catch (SQLException e) {
+			logger.error("Fetch transaction details failed. ", e);
+			return null;
+		} 
     }
     
     //fetch all transactions for one restaurant
