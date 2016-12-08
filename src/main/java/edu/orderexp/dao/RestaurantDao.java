@@ -277,7 +277,8 @@ public class RestaurantDao implements Dao<Restaurant> {
             }
             ps.setInt(hasPassword ? 9 : 8, id);
             ps.executeUpdate();
-
+            
+            return true;
         } catch (SQLException e) {
             logger.error("Update restaurant failed!", e);
             return false;
@@ -286,7 +287,7 @@ public class RestaurantDao implements Dao<Restaurant> {
                 ps.close();
             }
         }
-        return true;
+
     }
 
     @Override

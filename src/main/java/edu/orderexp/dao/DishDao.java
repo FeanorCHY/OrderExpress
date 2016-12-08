@@ -10,50 +10,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 
 public class DishDao implements Dao<Dish> {
-    String query = "";
+	final static Logger logger = Logger.getLogger(RestaurantDao.class);
     private DBConnector driver;
 
     public DishDao(DBConnector driver) {
         this.driver = driver;
-    }
-
-    /**
-     * Insert record to TABLE customer
-     *
-     * @return automate generated customer_id
-     */
-    public int insertDish(String name, String description, String pic_path, int restId, float price) throws SQLException {
-        Connection connection = driver.connect();
-        query = "INSERT INTO OrderExpress.dish(dish_name, description, pic_path, rest_id, price)" + "VALUE(?, ?, ?, ?, ?)";
-
-        try {
-            PreparedStatement ps = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setString(1, name);
-            ps.setString(2, description);
-            ps.setString(3, pic_path);
-            ps.setInt(4, restId);
-            ps.setFloat(5, price);
-
-            ps.executeUpdate();
-
-            ResultSet rs = ps.getGeneratedKeys();
-
-            if (rs.next()) {
-                int autoKey = rs.getInt(1);
-                return autoKey;
-            } else {
-                return -1;
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Dish insertion failed!!!");
-            e.printStackTrace();
-            return -1;
-        } finally {
-            connection.close();
-        }
     }
 
     @Override
@@ -68,7 +33,47 @@ public class DishDao implements Dao<Dish> {
 
     @Override
     public Dish add(Dish dish) throws SQLException {
-        return null;
+    	Connection conn = driver.connect();
+    	PreparedStatement ps = null;
+    	ResultSet rs = null;
+        String query = "INSERT INTO OrderExpress.dish(dish_name, description, pic_path, rest_id, price, stock)" + "VALUE(?, ?, ?, ?, ?, ?)";
+
+        try {
+            ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, dish.getDish_name());
+            ps.setString(2, dish.getDescription());
+            ps.setString(3, dish.getPic_path());
+            ps.setInt(4, dish.getRest_id());
+            ps.setFloat(5, dish.getPrice());
+            ps.setInt(6, dish.getStock());
+
+            ps.executeUpdate();
+
+            rs = ps.getGeneratedKeys();
+
+            if (rs.next()) {
+                dish.setDis_id(rs.getInt(1));
+                logger.info(dish.getDish_name() + "has been added to restaurant" 
+                		+ dish.getRest_id() + " successfully. ");  
+                return dish;
+            } else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            logger.error("Dish insertion failed. ", e);
+            return null;
+        } finally {
+        	if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
     }
 
     @Override
@@ -78,7 +83,31 @@ public class DishDao implements Dao<Dish> {
 
     @Override
     public boolean updateById(int id, Dish d) throws SQLException {
-        return false;
+    	Connection conn = driver.connect();
+    	PreparedStatement ps = null;
+    	
+    	String query = "UPDATE Dish SET dish_name=?, description=?, pic_path=?, price=?, stock=? "
+    			+ "WHERE dish_id=?";
+    	
+    	try {
+    		ps = conn.prepareStatement(query);
+    		ps.setString(1, d.getDish_name());
+    		ps.setString(2, d.getDescription());
+    		ps.setString(3, d.getPic_path());
+    		ps.setFloat(4, d.getPrice());
+    		ps.setInt(5, d.getStock());
+    		
+    		ps.setInt(6, id);
+    		return true;
+			
+		} catch (SQLException e) {
+			logger.error("Update dish failed. ", e);
+			return false;
+		} finally {
+			if(ps != null) {
+				ps.close();
+			}
+		}
     }
 
     @Override

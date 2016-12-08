@@ -32,18 +32,70 @@ public class TransactionDao implements Dao<Transaction> {
         return null;
     }
     
+    //fetch transactions for one customer
     public List<Transaction> fetchAllbyCusId(int cus_id) {
     	Connection conn = driver.connect();
     	CallableStatement cs = null;
     	ResultSet rs = null;
+    	List<Transaction> trans = new ArrayList<>();
     	
-    	String query = "{CALL get_res_tran_history_by_cus_id(?)}";
+    	String query = "{CALL get_tran_by_cus_id(?)}";
+    
+    	try {
+    		cs = conn.prepareCall(query);
+    		cs.setInt(1, cus_id);
+    		rs = cs.executeQuery();
+    		
+    		Transaction transaction = null;
+    		int tran_id = -1;
+    		
+    		while(rs.next()) {
+    			tran_id = rs.getInt("tran_id");
+    			
+				transaction = new Transaction(tran_id);
+				transaction.setTime(rs.getDate("tran_date"));
+				transaction.setPrice(rs.getFloat("total_price"));
+				transaction.addRestaurant(rs.getInt("res_id"), rs.getString("res_name"));	
+				
+				trans.add(transaction);
+    		}
+    		
+    		if(tran_id == -1) {
+    			logger.info(cus_id + "has no transaction records. ");
+    			return null;
+    		} else {
+    			return trans;
+    		}
+    				
+		} catch (SQLException e) {
+			logger.error("Retrieve transactions history by customer ID failed. ", e);
+			return null;
+		}
+    }
+    
+    public List<Dish> fetchDetailbyTranId(int tran_id) {
+    	Connection conn = driver.connect();
+    	CallableStatement cs = null;
+    	ResultSet rs = null;
+    	List<Dish> trans = new ArrayList<>();
+    	
+    	String query = "{CALL get_tran_detail_by_tran_id(?)}";
+    
+    }
+    
+    //fetch all transactions for one restaurant
+    public List<Transaction> fetchAllbyResId(int res_id) {
+    	Connection conn = driver.connect();
+    	CallableStatement cs = null;
+    	ResultSet rs = null;
+    	
+    	String query = "{CALL get_res_tran_history_by_res_id(?)}";
     	
     	Map<Integer, Transaction> idToTrans = new HashMap<>();
     	
     	try {
     		cs = conn.prepareCall(query);
-    		cs.setInt(1, cus_id);
+    		cs.setInt(1, res_id);
     		rs = cs.executeQuery();
     		
     		Transaction transaction = null;
@@ -68,14 +120,14 @@ public class TransactionDao implements Dao<Transaction> {
     		}
     		
     		if(tran_id == -1) {
-    			logger.info(cus_id + "has no transaction records. ");
+    			logger.info(res_id + "has no transaction records. ");
     			return null;
     		} else {
     			return new ArrayList(idToTrans.values());
     		}
     				
 		} catch (SQLException e) {
-			logger.error("Retrieve transactions history by customer ID failed. ", e);
+			logger.error("Retrieve transactions history by restaurant ID failed. ", e);
 			return null;
 		}
     }
