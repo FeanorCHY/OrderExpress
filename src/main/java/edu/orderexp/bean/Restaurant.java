@@ -7,6 +7,7 @@ public class Restaurant {
 
     private int res_id;
     private String res_name;
+    private String res_email;
     private String res_password;
     private String res_phone;
     private String res_address;
@@ -14,11 +15,14 @@ public class Restaurant {
     private int res_delivery_time;
     private int res_favor_times;
     private int res_rating;
+    
     public Restaurant() {
     }
+    
     public Restaurant(String res_name) {
         this.res_name = res_name;
     }
+    
     public Restaurant(String res_name, String res_password, String res_address, String res_type, int res_delivery_time) {
         this.res_name = res_name;
         this.res_password = res_password;
@@ -98,4 +102,12 @@ public class Restaurant {
     public void setRes_rating(int res_rating) {
         this.res_rating = res_rating;
     }
+
+	public String getRes_email() {
+		return res_email;
+	}
+
+	public void setRes_email(String res_email) {
+		this.res_email = res_email;
+	}
 }

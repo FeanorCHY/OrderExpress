@@ -109,15 +109,36 @@ public class RestaurantDao implements Dao<Restaurant> {
 
     @Override
     public Restaurant fetchElementById(int id) {
-        return null;
+    	Connection conn = driver.connect();
+
+        ArrayList<Restaurant> restaurants = new ArrayList<>();
+        String query = "SELECT * FROM Restaurant WHERE res_id = ?";
+
+        try {
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                restaurants.add(fromResultSet(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Fetch customer from id failed! ");
+            return null;
+        }
+
+        return restaurants.size() == 1 ? restaurants.get(0) : null;
     }
+
 
     @Override
     public Restaurant add(Restaurant restaurant) throws SQLException {
         Connection conn = driver.connect();
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String query = "INSERT INTO Restaurant(res_name, res_password, res_address, res_phone, res_type, res_delivery_time, res_favor_times, res_rating) " + "VALUE(?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Restaurant(res_name, res_password, res_address, res_phone, res_type, res_delivery_time, res_favor_times, res_rating, res_email) " 
+        		+ "VALUE(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -129,6 +150,8 @@ public class RestaurantDao implements Dao<Restaurant> {
             ps.setInt(6, restaurant.getRes_delivery_time());
             ps.setInt(7, restaurant.getRes_favor_times());
             ps.setInt(8, restaurant.getRes_rating());
+            ps.setString(9,  restaurant.getRes_email());
+            
             ps.executeUpdate();
             rs = ps.getGeneratedKeys();
             if (rs.next()) {
@@ -156,12 +179,114 @@ public class RestaurantDao implements Dao<Restaurant> {
 
     @Override
     public boolean exist(Restaurant restaurant) {
-        return false;
+    	boolean flag = false;
+        try {
+            if (!restaurant.getRes_email().equals("")) {
+                flag = emailExist(restaurant.getRes_email());
+                logger.info(flag ? "email exists." : "unregistered email.");
+            }
+        } catch (SQLException e) {
+            logger.error("Restaurant existence validation.", e);
+        }
+        return flag;
     }
-
+    
+    /**
+     * @return the email exists or not
+     */
+    private boolean emailExist(String email) throws SQLException {
+        Connection conn = driver.connect();
+        Restaurant restaurant = fetchElementByEmail(conn, email);
+        conn.close();
+        return restaurant != null;
+    }
+    
+    //fetch restaurant by email
+    public Restaurant fetchElementByEmail(Connection conn, String email) throws SQLException {
+    	ArrayList<Restaurant> resList = new ArrayList<>();
+    	String query = "SELECT * FROM Restaurant WHERE res_email = ?";
+    	PreparedStatement ps = conn.prepareStatement(query);
+    	ps.setString(1, email);
+    	
+    	ResultSet rs = ps.executeQuery();
+    	
+    	while(rs.next()) {
+    		resList.add(fromResultSet(rs));
+    	}
+    	return resList.size() == 1? resList.get(0) : null;
+    }
+    
+    //get restaurant from result set
+    private Restaurant fromResultSet(ResultSet rs) throws SQLException {
+    	Restaurant restaurant = new Restaurant();
+    	restaurant.setRes_id(rs.getInt(1));
+    	restaurant.setRes_name(rs.getString(2));
+    	restaurant.setRes_password(rs.getString(3));
+    	restaurant.setRes_address(rs.getString(4));
+    	restaurant.setRes_phone(rs.getString(5));
+    	restaurant.setRes_type(rs.getString(6));
+    	restaurant.setRes_delivery_time(rs.getInt(7));
+    	restaurant.setRes_favor_times(rs.getInt(8));
+    	restaurant.setRes_rating(rs.getShort(9));
+    	restaurant.setRes_email(rs.getString(10));
+    	
+    	return restaurant;
+    }
+    
+    public Restaurant authenticate(Restaurant res) throws SQLException {
+        ArrayList<Restaurant> restaurants = new ArrayList<>();
+        Connection conn = driver.connect();
+        String query = "SELECT * FROM Restaurant WHERE res_email = ? AND res_email = ?";
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, res.getRes_email());
+        ps.setString(2, res.getRes_password());
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            restaurants.add(fromResultSet(rs));
+        }
+        return restaurants.size() == 1 ? restaurants.get(0) : null;
+    }
+    
     @Override
     public boolean updateById(int id, Restaurant r) throws SQLException {
-        return false;
+        Connection conn = driver.connect();
+        PreparedStatement ps = null;
+        String foreQuery = "UPDATE Restaurant SET res_name=?,res_email=?, res_address=?, "
+        		+ "res_phone=?, res_type=?, res_delivery_time=?, res_favor_times=?";
+        String password = ", cus_password=?";
+        String rearQuery = " WHERE res_id=?";
+        String query;
+        boolean hasPassword = !r.getRes_password().equals("");
+        if (hasPassword) {
+            query = foreQuery + password + rearQuery;
+        } else {
+            query = foreQuery + rearQuery;
+        }
+        try {
+            ps = conn.prepareStatement(query);
+            ps.setString(1, r.getRes_name());
+            ps.setString(2, r.getRes_email());
+            ps.setString(3, r.getRes_address());
+            ps.setString(4, r.getRes_phone());
+            ps.setString(5, r.getRes_type());
+            ps.setInt(6, r.getRes_delivery_time());
+            ps.setInt(7, r.getRes_favor_times());
+            
+            if (hasPassword) {
+                ps.setString(8, r.getRes_password());
+            }
+            ps.setInt(hasPassword ? 9 : 8, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            logger.error("Update restaurant failed!", e);
+            return false;
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+        }
+        return true;
     }
 
     @Override
