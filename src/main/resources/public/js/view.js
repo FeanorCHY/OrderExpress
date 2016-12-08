@@ -604,14 +604,6 @@ function fetchTemplate(templateIdentifier) {
     });
 }
 
-function removeBeforeAppend() {
-    let root = $("#home-left-panel"),
-        offspring = root.children();
-    for (let i = 1; i < offspring.length; i++) {
-        $(offspring[i]).remove();
-    }
-}
-
 module.exports = {
     UserBadgeView: UserBadgeView,
     LoginMaskView: LoginMaskView,

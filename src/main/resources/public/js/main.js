@@ -76,30 +76,46 @@ $(document).ready(function () {
 
     AppRouter.on('route:profile', function (cus_id) {
         $("section.content-header").find("h1").html("Profile<small>And we deliver your favorite food!</small>");
-        $("#home-left-panel").find(".box").hide();
-        $("#home-right-panel").find(".box").hide();
+        utils.dom.left_boxes.hide();
+        utils.dom.right_boxes.hide();
+        utils.dom.left_loading_box.show();
+        utils.dom.right_loading_box.show();
+
         userProfileSummaryView.render();
         // userTransactionView.render();
+
+        utils.dom.left_loading_box.hide();
+        utils.dom.right_loading_box.hide();
         userProfileSummaryView.$el.show();
         userTransactionView.$el.show();
     });
     AppRouter.on('route:editProfile', function (cus_id) {
-        $("section.content-header").find("h1").html("Profile<small>And we deliver your favorite food!</small>");
-        $("#home-right-panel").find(".box").hide();
+        utils.dom.switch_user_profile_heading();
+        utils.dom.right_boxes.hide();
+        utils.dom.right_loading_box.show();
+
         userProfileSummaryView.render();
         userProfileView.render();
+
+        utils.dom.right_loading_box.hide();
         userProfileView.$el.show();
     });
     AppRouter.on('route:home', function () {
-        $("section.content-header").find("h1").html("Pick a Restaurant<small>And we deliver your favorite food!</small>");
-        $("#home-left-panel").find(".box").hide();
-        $("#home-right-panel").find(".box").hide();
+        utils.dom.switch_home_heading();
+        utils.dom.left_boxes.hide();
+        utils.dom.right_boxes.hide();
+        utils.dom.left_loading_box.show();
+        utils.dom.right_loading_box.show();
+
         restaurantTypeModel.fetchData();
         restaurantTypeModel.on("change", function () {
             restaurantTypeView.render();
             restaurantFilterModel.bindEvents();
             rsrView.render();
             restaurantFilterModel.bindSearchText();
+
+            utils.dom.left_loading_box.hide();
+            utils.dom.right_loading_box.hide();
             restaurantTypeView.$el.show();
             rsrView.$el.show();
         });

@@ -172,6 +172,9 @@ let DishModel = Backbone.Model.extend({
     }
 });
 
+let UserTransactionModel = Backbone.Model.extend({
+});
+
 module.exports = {
     Customer: Customer,
     RestaurantFilterModel: RestaurantFilterModel,
