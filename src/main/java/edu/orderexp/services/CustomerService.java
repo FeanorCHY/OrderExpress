@@ -75,44 +75,44 @@ public class CustomerService {
 
         // get customers from database
         get("/user/:cus_id", (request, response) -> {
-        	HashMap<String, Object> attributes = new HashMap<>();
-        	Session session = request.session(true);
-        	
-        	int cus_id = Integer.parseInt(request.params("cus_id"));
-        	customer = cd.fetchElementById(cus_id);
-        	
-        	if(customer != null) {
-        		session.attribute("customer", customer);
-        		attributes.put("customer", customer);
-        		attributes.put("statusMsg", "Customer exists. ");
-        		logger.info(customer.getCus_email() + " exists. ");
-        	} else {
-        		response.status(404); //not found
-        		attributes.put("statusMsg", "Customer inexisted. ");
-        	}
-        	
+            HashMap<String, Object> attributes = new HashMap<>();
+            Session session = request.session(true);
+
+            int cus_id = Integer.parseInt(request.params("cus_id"));
+            customer = cd.fetchElementById(cus_id);
+
+            if (customer != null) {
+                session.attribute("customer", customer);
+                attributes.put("customer", customer);
+                attributes.put("statusMsg", "Customer exists. ");
+                logger.info(customer.getCus_email() + " exists. ");
+            } else {
+                response.status(404); //not found
+                attributes.put("statusMsg", "Customer inexisted. ");
+            }
+
             return gson.toJson(attributes);
         });
 
         // update users info in database
         put("/user/:cus_id", (request, response) -> {
-        	HashMap<String, Object> attributes = new HashMap<>();
-        	Session session = request.session(true);
-        	// http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
+            HashMap<String, Object> attributes = new HashMap<>();
+            Session session = request.session(true);
+            // http://stackoverflow.com/questions/14551194/how-are-parameters-sent-in-an-http-post-request
             customer = fromJson(request.body(), Customer.class);
             int cus_id = Integer.parseInt(request.params(":cus_id"));
-        	boolean updateSuccess = cd.updateById(cus_id, customer);
+            boolean updateSuccess = cd.updateById(cus_id, customer);
 
-            if(updateSuccess) {
-            	session.attribute("customer", customer);
-            	attributes.put("customer", customer);
-            	attributes.put("statusMsg", "Profile update succeed.");
-            	logger.info(customer.getCus_email() + " update profile.");
+            if (updateSuccess) {
+                session.attribute("customer", customer);
+                attributes.put("customer", customer);
+                attributes.put("statusMsg", "Profile update succeed.");
+                logger.info(customer.getCus_email() + " update profile.");
             } else {
-            	response.status(403); //forbidden
-            	attributes.put("statusMsg", "Update failed.");
+                response.status(403); //forbidden
+                attributes.put("statusMsg", "Update failed.");
             }
-            
+
             return gson.toJson(attributes);
         });
 
@@ -154,6 +154,17 @@ public class CustomerService {
                 session.removeAttribute("customer");
                 attributes.put("statusMsg", "User log out.");
                 logger.info(customer.getCus_email() + " logout.");
+            }
+            return gson.toJson(attributes);
+        });
+
+        delete("user/:cus_id", (request, response) -> {
+            HashMap<String, Object> attributes = new HashMap<>();
+            boolean success = cd.deleteById(Integer.parseInt(request.queryParams(":cus_id")));
+            if (success) {
+                attributes.put("statusMsg", "Delete success.");
+            } else {
+                attributes.put("statusMsg", "Delete fail.");
             }
             return gson.toJson(attributes);
         });

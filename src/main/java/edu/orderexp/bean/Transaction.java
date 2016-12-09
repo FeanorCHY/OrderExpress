@@ -5,84 +5,95 @@ package edu.orderexp.bean;
  * @date 11/15/2016
  */
 
-import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Transaction {
 
-	private int id;
-	private int cusId;
-	private Date time;
-	private BigDecimal price;
-	private Map<Dish, Integer> dishes;	//Dish->Quantity
-	
-	public Transaction() {
-		time = new Date(System.currentTimeMillis());
-		dishes = new HashMap<Dish, Integer>();
-	}
-	
-	public Transaction(int id) {
-		this.id = id;
-		dishes = new HashMap<>();
-	}
+    private int tran_id;
+    private int cus_id;
+    private long tran_date;
+    private float total_price;
+    private HashMap<Integer, Restaurant> restaurants = new HashMap<Integer, Restaurant>();
+    private Map<Dish, Integer> dishs = new HashMap<>();    //Dish->Quantity
 
-	public int getId() {
-		return id;
-	}
+    public Transaction() {
 
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	/*
-	 * Get and set customer Id
-	 */
-	public int getCusId() {
-		return cusId;
-	}
+    }
 
-	public void setCusId(int cusId) {
-		this.cusId = cusId;
-	}
-	
-	/*
-	 * Get and set current time
-	 */
-	public Date getTime() {
-		return time;
-	}
+    public Transaction(int tran_id) {
+        this.tran_id = tran_id;
+    }
 
-	public void setTime(java.sql.Date time) {
-		this.time = time;
-	}
+    public Transaction(int tran_id, Date tran_date, float total_price) {
 
-	/*
-	 * Get and set total price of transaction 
-	 */
-	public BigDecimal getPrice() {
-		return price;
-	}
+        this.tran_id = tran_id;
+        this.tran_date = tran_date.getTime();
+        this.total_price = total_price;
+    }
 
-	public void setPrice(BigDecimal price) {
-		this.price = price;
-	}
-	
-	/*
-	 * Get and set dish & its quantity
-	 */
-	public Map<Dish, Integer> getDishes() {
-		return dishes;
-	}
+    public int getTran_id() {
+        return tran_id;
+    }
 
-	//Add dish to list
-	public void addDish(Dish dish, int qty) {
-		if(dishes.containsKey(dish)) {
-			dishes.put(dish, dishes.get(dish)+qty);
-		} else {
-			dishes.put(dish, qty);
-		}
-	}
-	
+    public void setTran_id(int tran_id) {
+        this.tran_id = tran_id;
+    }
+
+    public int getCus_id() {
+        return cus_id;
+    }
+
+    public void setCus_id(int cus_id) {
+        this.cus_id = cus_id;
+    }
+
+    public Date getTran_date() {
+        return new Date(tran_date);
+    }
+
+    public void setTran_date(Date tran_date) {
+        this.tran_date = tran_date.getTime();
+    }
+
+    public float getTotal_price() {
+        return total_price;
+    }
+
+    public void setTotal_price(float total_price) {
+        this.total_price = total_price;
+    }
+
+    public HashMap<Integer, Restaurant> getRestaurants() {
+        return restaurants;
+    }
+
+    public void setRestaurants(HashMap<Integer, Restaurant> restaurants) {
+        this.restaurants = restaurants;
+    }
+
+    public Map<Dish, Integer> getDishs() {
+        return dishs;
+    }
+
+    public void setDishs(Map<Dish, Integer> dishs) {
+        this.dishs = dishs;
+    }
+
+    //Add dish to list
+    public void addDish(Dish dish, int qty) {
+        if (dishs.containsKey(dish)) {
+            dishs.put(dish, dishs.get(dish) + qty);
+        } else {
+            dishs.put(dish, qty);
+        }
+    }
+
+    public void addRestaurant(Restaurant restaurant) {
+        if (!this.getRestaurants().containsKey(restaurant.getRes_id())) {
+            restaurants.put(restaurant.getRes_id(), restaurant);
+        }
+    }
+
 }

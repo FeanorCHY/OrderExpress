@@ -24,6 +24,7 @@ $(document).ready(function () {
     loadDOMElements();
     let AppRouter = new Router.AppRouter();
     let customerModel = new Model.Customer();
+    let userTransactionCollection = new Collection.UserTransactionCollection();
     let userBadgeView = new View.UserBadgeView({
         model: customerModel
     });
@@ -33,8 +34,9 @@ $(document).ready(function () {
     let userProfileView = new View.UserProfileView({
         model: customerModel
     });
-    let userTransactionView = new View.UserTransactionView();
-    // userTransactionView.render();
+    let userTransactionView = new View.UserTransactionView({
+        model: userTransactionCollection
+    });
     customerModel.on("change", function () {
         userBadgeView.render();
         if (customerModel.get("isLoggedIn")) {
@@ -74,20 +76,55 @@ $(document).ready(function () {
         loginMaskView.render();
     });
 
+    document.getElementById("home-right-panel").addEventListener("click", function (e) {
+        let target,
+            targetIsBtn = e.target && e.target.nodeName === "BUTTON" && e.target.hasChildNodes()&& e.target.childNodes.nodeName==="I",
+            targetIsIcon = e.target && e.target.className.split(" ")[1] === "fa-plus",
+            theModel;
+        if (targetIsBtn || targetIsIcon) {
+            target = targetIsBtn ? $(e.target) : $(e.target).parent();
+            theModel = userTransactionCollection.get(+target.attr("value"));
+            theModel.on("reload",function () {
+                console.log(theModel);
+                let userTransactionDetailView = new View.UserTransactionDetailView({
+                    model: theModel
+                });
+                userTransactionDetailView.render();
+                console.log(userTransactionDetailView.$el.html());
+            });
+            theModel.fetchData();
+        }
+    });
+
     AppRouter.on('route:profile', function (cus_id) {
-        $("section.content-header").find("h1").html("Profile<small>And we deliver your favorite food!</small>");
+        utils.dom.switch_user_profile_heading();
         utils.dom.left_boxes.hide();
         utils.dom.right_boxes.hide();
         utils.dom.left_loading_box.show();
         utils.dom.right_loading_box.show();
 
         userProfileSummaryView.render();
-        // userTransactionView.render();
-
+        userTransactionCollection.fetchData(cus_id);
+        userTransactionCollection.on("init", function () {
+            userTransactionView.render();
+            utils.dom.right_loading_box.hide();
+            userTransactionView.$el.show();
+            // $(".tran-expand-btn").click(function () {
+            //     let self = this,
+            //         theModel = userTransactionCollection.get(+$(self).attr("value"));
+            //     theModel.fetchData();
+            //     theModel.on("reload",function () {
+            //         console.log(theModel);
+            //         let userTransactionDetailView = new View.UserTransactionDetailView({
+            //             model: theModel
+            //         });
+            //         userTransactionDetailView.$el.show("slow");
+            //         userTransactionDetailView.render();
+            //     });
+            // })
+        });
         utils.dom.left_loading_box.hide();
-        utils.dom.right_loading_box.hide();
         userProfileSummaryView.$el.show();
-        userTransactionView.$el.show();
     });
     AppRouter.on('route:editProfile', function (cus_id) {
         utils.dom.switch_user_profile_heading();
@@ -119,10 +156,6 @@ $(document).ready(function () {
             restaurantTypeView.$el.show();
             rsrView.$el.show();
         });
-    });
-    AppRouter.on('route:fetchTransListByCusId', function (cus_id) {
-        let userTransactionCollection = new Collection.UserTransactionCollection( );
-        userTransactionCollection.fetchData(cus_id);
     });
     Backbone.history.start();
     AppRouter.navigate("");

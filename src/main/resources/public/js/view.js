@@ -46,6 +46,20 @@ let UserProfileSummaryView = Backbone.View.extend({
         // removeBeforeAppend();
         this.$el.html(self.template(self.model.attributes));
         utils.loadings.hideLeftLoading();
+        this.bindEvents();
+    },
+    bindEvents: function () {
+        let self = this;
+        $("#user-delete-btn").click(function () {
+            self.model.destroy({
+                success: function (model, response, options) {
+                    window.location.href = "/";
+                },
+                fail: function (model, response, options) {
+
+                }
+            });
+        })
     }
 });
 
@@ -173,8 +187,28 @@ let UserTransactionView = Backbone.View.extend({
     el: "#user-transaction-container",
     template: _.template(utils.secureElement($("#user-transaction-template"))),
     render: function () {
+        console.log("refreshed");
         let self = this;
-        this.$el.html(self.template());
+        this.$el.html(self.template({
+            transactions: self.model.models.map(function (transaction) {
+                return transaction.attributes
+            })
+        }));
+        this.bindEvents();
+    },
+    bindEvents: function () {
+    }
+});
+
+let UserTransactionDetailView = Backbone.View.extend({
+    template: _.template(utils.secureElement($("#user-transaction-detail-template"))),
+    render: function () {
+        let self = this,
+            tran_id = this.model.get("tran_id");
+        this.el = "#user-transaction-detail-" + tran_id;
+        this.$el.html(self.template({
+            restaurants: self.model.get("res_list")
+        }));
     }
 });
 
@@ -594,6 +628,7 @@ let RestaurantSearchResultView = Backbone.View.extend({
     }
 });
 
+
 function fetchTemplate(templateIdentifier) {
     let template_url = __templateRoot + templateIdentifier + ".html";
     return $.ajax({
@@ -612,5 +647,7 @@ module.exports = {
     RestaurantSearchResultView: RestaurantSearchResultView,
     UserProfileSummaryView: UserProfileSummaryView,
     UserProfileView: UserProfileView,
-    UserTransactionView: UserTransactionView
+    UserTransactionView: UserTransactionView,
+    UserTransactionDetailView: UserTransactionDetailView
 };
+

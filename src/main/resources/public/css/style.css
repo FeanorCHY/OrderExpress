@@ -25,6 +25,13 @@
 }
 
 /*
+ * user-transaction-table
+ */
+#user-transaction-table .box{
+    margin-bottom: 0;
+}
+
+/*
  * Page: Login & Register
  * ----------------------
  */

@@ -30,12 +30,19 @@ let UserTransactionCollection = Backbone.Collection.extend({
         $.when($.get({
             url: self.url,
             dataType: 'json'
-        })).done(function (data) {
-            console.log(data.trans_list);
-            self.set(data.trans_list, {reset: true});
-            self.trigger("change");
+        })).done(function (data, textStatus, call) {
+            if (call.status !== 204) {
+                let models = [];
+                Object.keys(data.transactions).forEach(function (tran_id) {
+                    let model = new Model.UserTransactionModel();
+                    model.parseBy(data.transactions[tran_id]);
+                    models.push(model);
+                });
+                self.set(models, {reset: true});
+                self.trigger("init");
+            }
         }).fail(function (xhr, textStatus) {
-            console.log(xhr.status);
+            console.log(xhr);
         });
     }
 });

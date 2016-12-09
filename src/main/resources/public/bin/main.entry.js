@@ -70,6 +70,7 @@
 	    loadDOMElements();
 	    let AppRouter = new Router.AppRouter();
 	    let customerModel = new Model.Customer();
+	    let userTransactionCollection = new Collection.UserTransactionCollection();
 	    let userBadgeView = new View.UserBadgeView({
 	        model: customerModel
 	    });
@@ -79,8 +80,9 @@
 	    let userProfileView = new View.UserProfileView({
 	        model: customerModel
 	    });
-	    let userTransactionView = new View.UserTransactionView();
-	    // userTransactionView.render();
+	    let userTransactionView = new View.UserTransactionView({
+	        model: userTransactionCollection
+	    });
 	    customerModel.on("change", function () {
 	        userBadgeView.render();
 	        if (customerModel.get("isLoggedIn")) {
@@ -120,20 +122,55 @@
 	        loginMaskView.render();
 	    });
 
+	    document.getElementById("home-right-panel").addEventListener("click", function (e) {
+	        let target,
+	            targetIsBtn = e.target && e.target.nodeName === "BUTTON" && e.target.hasChildNodes()&& e.target.childNodes.nodeName==="I",
+	            targetIsIcon = e.target && e.target.className.split(" ")[1] === "fa-plus",
+	            theModel;
+	        if (targetIsBtn || targetIsIcon) {
+	            target = targetIsBtn ? $(e.target) : $(e.target).parent();
+	            theModel = userTransactionCollection.get(+target.attr("value"));
+	            theModel.on("reload",function () {
+	                console.log(theModel);
+	                let userTransactionDetailView = new View.UserTransactionDetailView({
+	                    model: theModel
+	                });
+	                userTransactionDetailView.render();
+	                console.log(userTransactionDetailView.$el.html());
+	            });
+	            theModel.fetchData();
+	        }
+	    });
+
 	    AppRouter.on('route:profile', function (cus_id) {
-	        $("section.content-header").find("h1").html("Profile<small>And we deliver your favorite food!</small>");
+	        utils.dom.switch_user_profile_heading();
 	        utils.dom.left_boxes.hide();
 	        utils.dom.right_boxes.hide();
 	        utils.dom.left_loading_box.show();
 	        utils.dom.right_loading_box.show();
 
 	        userProfileSummaryView.render();
-	        // userTransactionView.render();
-
+	        userTransactionCollection.fetchData(cus_id);
+	        userTransactionCollection.on("init", function () {
+	            userTransactionView.render();
+	            utils.dom.right_loading_box.hide();
+	            userTransactionView.$el.show();
+	            // $(".tran-expand-btn").click(function () {
+	            //     let self = this,
+	            //         theModel = userTransactionCollection.get(+$(self).attr("value"));
+	            //     theModel.fetchData();
+	            //     theModel.on("reload",function () {
+	            //         console.log(theModel);
+	            //         let userTransactionDetailView = new View.UserTransactionDetailView({
+	            //             model: theModel
+	            //         });
+	            //         userTransactionDetailView.$el.show("slow");
+	            //         userTransactionDetailView.render();
+	            //     });
+	            // })
+	        });
 	        utils.dom.left_loading_box.hide();
-	        utils.dom.right_loading_box.hide();
 	        userProfileSummaryView.$el.show();
-	        userTransactionView.$el.show();
 	    });
 	    AppRouter.on('route:editProfile', function (cus_id) {
 	        utils.dom.switch_user_profile_heading();
@@ -165,10 +202,6 @@
 	            restaurantTypeView.$el.show();
 	            rsrView.$el.show();
 	        });
-	    });
-	    AppRouter.on('route:fetchTransListByCusId', function (cus_id) {
-	        let userTransactionCollection = new Collection.UserTransactionCollection( );
-	        userTransactionCollection.fetchData(cus_id);
 	    });
 	    Backbone.history.start();
 	    AppRouter.navigate("");
@@ -240,7 +273,7 @@
 
 
 	// module
-	exports.push([module.id, "/*\n * Page: index\n * ----------------------\n */\n\n/*\n *Filters\n */\n#side-filter {\n    margin-top: -30px;\n}\n\n#restaurant-cuisine {\n    min-height: 300px;\n}\n.hidden-range {\n    display: none;\n}\n\n/*\n * search-result\n */\n#restaurant-search-table {\n    min-height: 645px;\n}\n\n/*\n * Page: Login & Register\n * ----------------------\n */\n\n.login-logo,\n.register-logo {\n    font-size: 35px;\n    text-align: center;\n    margin-bottom: 25px;\n    font-weight: 300;\n}\n\n.login-logo a,\n.register-logo a {\n    color: #444;\n}\n\n.login-page,\n.register-page {\n    background-color: #d2d6de;\n}\n\n.login-background {\n    position: fixed;\n    left: 0;\n    top: 0;\n    width: 100%;\n    min-height: 100%;\n    height: inherit;\n    background-color: #d2d6de;\n    z-index: 2000;\n    /* for IE */\n    filter: alpha(opacity=90);\n    /* CSS3 standard */\n    opacity: 0.9;\n}\n\n.login-mask {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100%;\n    min-height: 100%;\n    margin: 0 auto;\n    background: transparent;\n    z-index: 3000;\n}\n\n.login-box {\n    width: 360px;\n    margin: 7% auto;\n    z-index: 3100;\n}\n\n.register-box {\n    width: 360px;\n    margin: 7% auto;\n}\n\n@media (max-width: 768px) {\n    .login-box,\n    .register-box {\n        width: 90%;\n        margin-top: 20px;\n    }\n}\n\n.login-box-body,\n.register-box-body {\n    background: #fff;\n    padding: 20px;\n    border-top: 0;\n    color: #666;\n}\n\n.login-box-body .form-control-feedback,\n.register-box-body .form-control-feedback {\n    color: #777;\n}\n\n.login-box-msg,\n.register-box-msg {\n    margin: 0;\n    text-align: center;\n    padding: 0 20px 20px 20px;\n}\n\n.social-auth-links {\n    margin: 10px 0;\n}\n\n#chk-err {\n    color: red;\n}\n\n.clearfix:before,\n.clearfix:after {\n    content: \" \";\n    display: table;\n}\n\n.clearfix:after {\n    clear: both;\n    overflow: hidden;\n}\n\n.clearfix {\n    zoom: 1;\n    /* IE < 8 */\n}\n", ""]);
+	exports.push([module.id, "/*\n * Page: index\n * ----------------------\n */\n\n/*\n *Filters\n */\n#side-filter {\n    margin-top: -30px;\n}\n\n#restaurant-cuisine {\n    min-height: 300px;\n}\n.hidden-range {\n    display: none;\n}\n\n/*\n * search-result\n */\n#restaurant-search-table {\n    min-height: 645px;\n}\n\n/*\n * user-transaction-table\n */\n#user-transaction-table .box{\n    margin-bottom: 0;\n}\n\n/*\n * Page: Login & Register\n * ----------------------\n */\n\n.login-logo,\n.register-logo {\n    font-size: 35px;\n    text-align: center;\n    margin-bottom: 25px;\n    font-weight: 300;\n}\n\n.login-logo a,\n.register-logo a {\n    color: #444;\n}\n\n.login-page,\n.register-page {\n    background-color: #d2d6de;\n}\n\n.login-background {\n    position: fixed;\n    left: 0;\n    top: 0;\n    width: 100%;\n    min-height: 100%;\n    height: inherit;\n    background-color: #d2d6de;\n    z-index: 2000;\n    /* for IE */\n    filter: alpha(opacity=90);\n    /* CSS3 standard */\n    opacity: 0.9;\n}\n\n.login-mask {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100%;\n    min-height: 100%;\n    margin: 0 auto;\n    background: transparent;\n    z-index: 3000;\n}\n\n.login-box {\n    width: 360px;\n    margin: 7% auto;\n    z-index: 3100;\n}\n\n.register-box {\n    width: 360px;\n    margin: 7% auto;\n}\n\n@media (max-width: 768px) {\n    .login-box,\n    .register-box {\n        width: 90%;\n        margin-top: 20px;\n    }\n}\n\n.login-box-body,\n.register-box-body {\n    background: #fff;\n    padding: 20px;\n    border-top: 0;\n    color: #666;\n}\n\n.login-box-body .form-control-feedback,\n.register-box-body .form-control-feedback {\n    color: #777;\n}\n\n.login-box-msg,\n.register-box-msg {\n    margin: 0;\n    text-align: center;\n    padding: 0 20px 20px 20px;\n}\n\n.social-auth-links {\n    margin: 10px 0;\n}\n\n#chk-err {\n    color: red;\n}\n\n.clearfix:before,\n.clearfix:after {\n    content: \" \";\n    display: table;\n}\n\n.clearfix:after {\n    clear: both;\n    overflow: hidden;\n}\n\n.clearfix {\n    zoom: 1;\n    /* IE < 8 */\n}\n", ""]);
 
 	// exports
 
@@ -7960,6 +7993,20 @@
 	        // removeBeforeAppend();
 	        this.$el.html(self.template(self.model.attributes));
 	        utils.loadings.hideLeftLoading();
+	        this.bindEvents();
+	    },
+	    bindEvents: function () {
+	        let self = this;
+	        $("#user-delete-btn").click(function () {
+	            self.model.destroy({
+	                success: function (model, response, options) {
+	                    window.location.href = "/";
+	                },
+	                fail: function (model, response, options) {
+
+	                }
+	            });
+	        })
 	    }
 	});
 
@@ -8087,8 +8134,28 @@
 	    el: "#user-transaction-container",
 	    template: _.template(utils.secureElement($("#user-transaction-template"))),
 	    render: function () {
+	        console.log("refreshed");
 	        let self = this;
-	        this.$el.html(self.template());
+	        this.$el.html(self.template({
+	            transactions: self.model.models.map(function (transaction) {
+	                return transaction.attributes
+	            })
+	        }));
+	        this.bindEvents();
+	    },
+	    bindEvents: function () {
+	    }
+	});
+
+	let UserTransactionDetailView = Backbone.View.extend({
+	    template: _.template(utils.secureElement($("#user-transaction-detail-template"))),
+	    render: function () {
+	        let self = this,
+	            tran_id = this.model.get("tran_id");
+	        this.el = "#user-transaction-detail-" + tran_id;
+	        this.$el.html(self.template({
+	            restaurants: self.model.get("res_list")
+	        }));
 	    }
 	});
 
@@ -8508,6 +8575,7 @@
 	    }
 	});
 
+
 	function fetchTemplate(templateIdentifier) {
 	    let template_url = __templateRoot + templateIdentifier + ".html";
 	    return $.ajax({
@@ -8526,8 +8594,11 @@
 	    RestaurantSearchResultView: RestaurantSearchResultView,
 	    UserProfileSummaryView: UserProfileSummaryView,
 	    UserProfileView: UserProfileView,
-	    UserTransactionView: UserTransactionView
+	    UserTransactionView: UserTransactionView,
+	    UserTransactionDetailView: UserTransactionDetailView
 	};
+
+
 
 /***/ },
 /* 13 */
@@ -11062,7 +11133,7 @@
 	    },
 	    parseWith: function (customer) {
 	        this.set({
-	            id:customer.cus_id,
+	            id: customer.cus_id,
 	            cus_id: customer.cus_id,
 	            cus_name: customer.cus_name,
 	            cus_password: customer.cus_password,
@@ -11196,7 +11267,49 @@
 	});
 
 	let UserTransactionModel = Backbone.Model.extend({
-	    url:""
+	    parseBy: function (userTransactionObject) {
+	        let restaurants = userTransactionObject.restaurants,
+	            res_list = [];
+	        Object.keys(restaurants).forEach(function (res_id) {
+	            res_list.push(restaurants[res_id])
+	        });
+	        this.set({
+	            id: userTransactionObject.tran_id,
+	            url: "/transaction/" + userTransactionObject.tran_id,
+	            tran_id: userTransactionObject.tran_id,
+	            total_price: userTransactionObject.total_price,
+	            tran_date: new Date((new Date(0)).setUTCSeconds(userTransactionObject.tran_date / 1000)),
+	            res_list: res_list
+	        });
+	    },
+	    fetchData: function () {
+	        let self = this;
+	        $.when($.getJSON(self.get("url")).done(function (data) {
+	            let res_list = self.get("res_list"),
+	                trans_detail = data.trans_detail,
+	                restaurants = {};
+	            res_list.forEach(function (res_obj) {
+	                res_obj["dish_list"] = [];
+	                restaurants[res_obj.res_id] = res_obj;
+	            });
+	            trans_detail.forEach(function (dish_obj) {
+	                restaurants[dish_obj.res_id].dish_list.push({
+	                    dish_id: dish_obj.dish_id,
+	                    dish_name: dish_obj.dish_name,
+	                    quantity: dish_obj.quantity,
+	                    pic_path: dish_obj.pic_path
+	                });
+	            });
+	            let temp_list = [];
+	            Object.keys(restaurants).forEach(function (key) {
+	                temp_list.push(restaurants[key]);
+	            });
+	            self.set("res_list",temp_list);
+	            self.trigger("reload");
+	        }).fail(function (xhr, textStatus) {
+	            console.log(xhr.status);
+	        }));
+	    }
 	});
 
 	module.exports = {
@@ -11204,6 +11317,7 @@
 	    RestaurantFilterModel: RestaurantFilterModel,
 	    RestaurantModel: RestaurantModel,
 	    RestaurantTypeModel: RestaurantTypeModel,
+	    UserTransactionModel: UserTransactionModel,
 	    DishModel: DishModel
 	};
 
@@ -11243,12 +11357,19 @@
 	        $.when($.get({
 	            url: self.url,
 	            dataType: 'json'
-	        })).done(function (data) {
-	            console.log(data.trans_list);
-	            self.set(data.trans_list, {reset: true});
-	            self.trigger("change");
+	        })).done(function (data, textStatus, call) {
+	            if (call.status !== 204) {
+	                let models = [];
+	                Object.keys(data.transactions).forEach(function (tran_id) {
+	                    let model = new Model.UserTransactionModel();
+	                    model.parseBy(data.transactions[tran_id]);
+	                    models.push(model);
+	                });
+	                self.set(models, {reset: true});
+	                self.trigger("init");
+	            }
 	        }).fail(function (xhr, textStatus) {
-	            console.log(xhr.status);
+	            console.log(xhr);
 	        });
 	    }
 	});
@@ -11274,8 +11395,7 @@
 	    routes: {
 	        "": "home",
 	        "user/:cus_id": "profile",
-	        "user/:cus_id/edit": "editProfile",
-	        "transaction/user/:cus_id": "fetchTransListByCusId"
+	        "user/:cus_id/edit": "editProfile"
 	    },
 	    initialize:function () {
 

@@ -4,10 +4,7 @@ import edu.orderexp.bean.Customer;
 import edu.orderexp.util.DBConnector;
 import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,7 +142,24 @@ public class CustomerDao implements Dao<Customer> {
 
     @Override
     public boolean deleteById(int id) throws SQLException {
-        return false;
+        Connection conn = driver.connect();
+        CallableStatement cs = null;
+        ResultSet rs = null;
+        String query = "{CALL delet_user_by_id(?)}";
+
+        cs = conn.prepareCall(query);
+        cs.setInt(1, id);
+        cs.registerOutParameter(2, Types.INTEGER);
+        rs = cs.executeQuery();
+        int output = -1;
+        while (rs.next()) {
+            output = rs.getInt(2);
+        }
+        if (output == 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public Customer authenticate(Customer customer) throws SQLException {

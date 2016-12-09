@@ -39,7 +39,7 @@ let Customer = Backbone.Model.extend({
     },
     parseWith: function (customer) {
         this.set({
-            id:customer.cus_id,
+            id: customer.cus_id,
             cus_id: customer.cus_id,
             cus_name: customer.cus_name,
             cus_password: customer.cus_password,
@@ -173,7 +173,49 @@ let DishModel = Backbone.Model.extend({
 });
 
 let UserTransactionModel = Backbone.Model.extend({
-    url:""
+    parseBy: function (userTransactionObject) {
+        let restaurants = userTransactionObject.restaurants,
+            res_list = [];
+        Object.keys(restaurants).forEach(function (res_id) {
+            res_list.push(restaurants[res_id])
+        });
+        this.set({
+            id: userTransactionObject.tran_id,
+            url: "/transaction/" + userTransactionObject.tran_id,
+            tran_id: userTransactionObject.tran_id,
+            total_price: userTransactionObject.total_price,
+            tran_date: new Date((new Date(0)).setUTCSeconds(userTransactionObject.tran_date / 1000)),
+            res_list: res_list
+        });
+    },
+    fetchData: function () {
+        let self = this;
+        $.when($.getJSON(self.get("url")).done(function (data) {
+            let res_list = self.get("res_list"),
+                trans_detail = data.trans_detail,
+                restaurants = {};
+            res_list.forEach(function (res_obj) {
+                res_obj["dish_list"] = [];
+                restaurants[res_obj.res_id] = res_obj;
+            });
+            trans_detail.forEach(function (dish_obj) {
+                restaurants[dish_obj.res_id].dish_list.push({
+                    dish_id: dish_obj.dish_id,
+                    dish_name: dish_obj.dish_name,
+                    quantity: dish_obj.quantity,
+                    pic_path: dish_obj.pic_path
+                });
+            });
+            let temp_list = [];
+            Object.keys(restaurants).forEach(function (key) {
+                temp_list.push(restaurants[key]);
+            });
+            self.set("res_list",temp_list);
+            self.trigger("reload");
+        }).fail(function (xhr, textStatus) {
+            console.log(xhr.status);
+        }));
+    }
 });
 
 module.exports = {
@@ -181,5 +223,6 @@ module.exports = {
     RestaurantFilterModel: RestaurantFilterModel,
     RestaurantModel: RestaurantModel,
     RestaurantTypeModel: RestaurantTypeModel,
+    UserTransactionModel: UserTransactionModel,
     DishModel: DishModel
 };

@@ -15,14 +15,19 @@ public class Restaurant {
     private int res_delivery_time;
     private int res_favor_times;
     private int res_rating;
-    
+
     public Restaurant() {
     }
-    
+
     public Restaurant(String res_name) {
         this.res_name = res_name;
     }
-    
+
+    public Restaurant(int res_id, String res_name) {
+        this.res_id = res_id;
+        this.res_name = res_name;
+    }
+
     public Restaurant(String res_name, String res_password, String res_address, String res_type, int res_delivery_time) {
         this.res_name = res_name;
         this.res_password = res_password;
@@ -103,11 +108,11 @@ public class Restaurant {
         this.res_rating = res_rating;
     }
 
-	public String getRes_email() {
-		return res_email;
-	}
+    public String getRes_email() {
+        return res_email;
+    }
 
-	public void setRes_email(String res_email) {
-		this.res_email = res_email;
-	}
+    public void setRes_email(String res_email) {
+        this.res_email = res_email;
+    }
 }

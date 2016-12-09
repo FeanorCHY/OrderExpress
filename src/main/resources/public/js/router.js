@@ -7,8 +7,7 @@ let AppRouter = Backbone.Router.extend({
     routes: {
         "": "home",
         "user/:cus_id": "profile",
-        "user/:cus_id/edit": "editProfile",
-        "transaction/user/:cus_id": "fetchTransListByCusId"
+        "user/:cus_id/edit": "editProfile"
     },
     initialize:function () {
 

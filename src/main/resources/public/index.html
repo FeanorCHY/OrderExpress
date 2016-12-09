@@ -95,9 +95,9 @@
             </li>
         </ul>
         <div>
-            <a href="#transaction/user/<%= cus_id %>" class="btn btn-primary btn-block"><b>My Orders</b></a>
+            <a href="#user/<%= cus_id %>" class="btn btn-primary btn-block"><b>My Orders</b></a>
             <a href="#user/<%= cus_id %>/edit" class="btn btn-primary btn-block"><b>Edit Profile</b></a>
-            <a href="#user/<%= cus_id %>" class="btn btn-danger btn-block"><b>Delete Account</b></a>
+            <a id="user-delete-btn" href="#user/<%= cus_id %>" class="btn btn-danger btn-block"><b>Delete Account</b></a>
         </div>
     </div>
     <!-- /.box-body -->
@@ -275,7 +275,6 @@
     <!--</div>-->
 </script>
 <script type="text/template" id="user-transaction-template">
-    <!--<div id="user-transaction-container" class="box box-info">-->
     <div class="box-header">
         <h3 class="box-title">Transactions</h3>
         <div class="box-tools">
@@ -291,207 +290,230 @@
         </div>
     </div>
     <!-- /.box-header -->
-    <div id="user-transaction-search-table" class="box-body table-responsive no-padding">
-        <table class="table table-hover">
-            <tbody>
-            <tr>
-                <th>Restaurant</th>
-                <th>Cuisine</th>
-                <th>Rating</th>
-                <th>Average Price</th>
-                <th>Delivery Time</th>
-            </tr>
-            <% _.each(restaurants, function(restaurant, index, list){ %>
-            <tr>
-                <td><%= restaurant.res_name %></td>
-                <td><%= restaurant.res_type %></td>
-                <td><span
-                        class="label label-<%= restaurant.res_rating<2?'danger':restaurant.res_rating<4?'warning':'success' %>"><%= restaurant.res_rating %></span>
-                </td>
-                <td>$<%= Math.round(restaurant.res_avg_price*100)/100 %></td>
-                <td><%= restaurant.res_delivery_time %> min</td>
-            </tr>
-            <% }); %>
-            </tbody>
-        </table>
+    <div id="user-transaction-table" class="box-body table-responsive no-padding">
+        <% _.each(transactions, function (transaction, index, transactions) { %>
+        <div id="user-transaction-<%=transaction.tran_id%>" class="box box-default collapsed-box">
+            <div class="box-header">
+                <div id="user-transaction-description-<%= transaction.tran_id%>">
+                    <h4 class="restaurant-names">
+                        #<%= transaction.tran_id %>&nbsp;-&nbsp;<strong>$<%= (+transaction.total_price).toFixed(2) %></strong>&nbsp;@&nbsp;<%= transaction.tran_date.toLocaleString()%>&nbsp;Paid&nbsp;to&nbsp;
+                        <% _.each(transaction.res_list, function (restaurant, indey, restaurants) { %>
+                            <strong><a href="#/restaurant/<%=restaurant.res_id%>"><%= restaurant.res_name %></a></strong><%= (indey===(restaurants.length-1))?"":",&nbsp;" %>
+                        <% }) %>
+                    </h4>
+                </div>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool tran-expand-btn" data-widget="collapse" value="<%=transaction.tran_id%>"><i class="fa fa-plus"></i>
+                    </button>
+                </div>
+                <!-- /.box-tools -->
+            </div>
+            <!-- /.box-header -->
+            <div id="user-transaction-detail-<%=transaction.tran_id%>" class="box-body" style="display: none;">
+
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <% }); %>
     </div>
-    <!-- /.box-body -->
-    <!--</div>-->
+</script>
+<script type="text/template" id="user-transaction-detail-template">
+    <table class="table table-hover">
+        <tbody>
+        <tr>
+            <th>#</th>
+            <th>Restaurant</th>
+            <th>Dish#</th>
+            <th>Dish</th>
+            <th>Quantity</th>
+        </tr>
+        <% _.each(restaurants, function(restaurant, index, list){
+            _.each(restaurant.dish_list, function (dish_obj, indey, dish_list) { %>
+        <tr>
+            <td><%= index %></td>
+            <td><%= restaurant.res_name %></td>
+            <td><%= dish_obj.dish_id %></td>
+            <td><%= dish_obj.dish_name %></td>
+            <td><%= dish_obj.quantity %></td>
+        </tr>
+        <%  });
+        }); %>
+        </tbody>
+    </table>
 </script>
 <div class="wrapper">
-        <header class="main-header">
-            <nav class="navbar navbar-static-top">
-                <div class="container">
-                    <div class="navbar-header">
-                        <a href="./" class="navbar-brand"><b>Order</b>Express</a>
-                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                                data-target="#navbar-collapse">
-                            <i class="fa fa-bars"></i>
-                        </button>
-                    </div>
-                    <!-- Collect the nav links, forms, and other content for toggling -->
-                    <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
-                        <ul class="nav navbar-nav">
-                            <li class="active"><a href="#"> Join us <span class="sr-only">(current)</span></a></li>
-                            <li class="dropdown">
-                                <a href="" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span
-                                        class="caret"></span></a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a href="#">Action</a></li>
-                                    <li><a href="#">Another action</a></li>
-                                    <li><a href="#">Something else here</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="#">Separated link</a></li>
-                                    <li class="divider"></li>
-                                    <li><a href="#">One more separated link</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <form class="navbar-form navbar-left" role="search">
-                            <div class="form-group">
-                                <input type="text" class="form-control" id="navbar-search-input" placeholder="Search">
-                            </div>
-                        </form>
-                    </div>
-                    <!-- /.navbar-collapse -->
-                    <!-- Navbar Right Menu -->
-                    <div class="navbar-custom-menu">
-                        <ul class="nav navbar-nav">
-                            <!-- Messages: style can be found in dropdown.less-->
-                            <!-- Notifications Menu -->
-                            <li class="dropdown notifications-menu">
-                                <!-- Menu toggle button -->
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fa fa-bell-o"></i>
-                                    <span class="label label-warning">10</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li class="header">You have 10 notifications</li>
-                                    <li>
-                                        <!-- Inner Menu: contains the notifications -->
-                                        <div class="slimScrollDiv"
-                                             style="position: relative; overflow: hidden; width: auto; height: 200px;">
-                                            <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-                                                <li>
-                                                    <!-- start notification -->
-                                                    <a href="#">
-                                                        <i class="fa fa-users text-aqua"></i> 5 new members joined today
-                                                    </a>
-                                                </li>
-                                                <!-- end notification -->
-                                            </ul>
-                                            <div class="slimScrollBar"
-                                                 style="background: rgb(0, 0, 0); width: 3px; position: absolute; top: 0px; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px;"></div>
-                                            <div class="slimScrollRail"
-                                                 style="width: 3px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
-                                        </div>
-                                    </li>
-                                    <li class="footer"><a href="#">View all</a></li>
-                                </ul>
-                            </li>
-                            <!-- Control Sidebar Toggle Button -->
-                            <li>
-                                <a href="#" data-toggle="control-sidebar"><i class="fa fa-shopping-cart"
-                                                                             aria-hidden="true"></i><span
-                                        class="label label-danger">9</span></a>
-                            </li>
-                            <!-- User Account Menu -->
-                            <li id="user-badge" class="dropdown user user-menu">
-                            </li>
-                            <li id="login-button" class="dropdown login-menu">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="display: block;"
-                                   aria-expanded="false">Sign In</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- /.navbar-custom-menu -->
-                </div>
-                <!-- /.container-fluid -->
-            </nav>
-        </header>
-        <!-- Full Width Column -->
-        <div class="content-wrapper" style="min-height: 679px;">
+    <header class="main-header">
+        <nav class="navbar navbar-static-top">
             <div class="container">
-                <!-- Content Header (Page header) -->
-                <section class="content-header">
-                    <h1>
-                        Pick a Restaurant
-                        <small>And we deliver your favorite food!</small>
-                    </h1>
-                </section>
-                <!-- Main content -->
-                <section class="content">
-                    <div id="restaurant-filter" class="row">
-                        <div id="home-left-panel" class="col-xs-4">
-                            <div id="left-panel-loading-box" class="box box-primary">
-                                <div class="box-header">
-                                    <h3 class="box-title">Loading ...</h3>
-                                </div>
-                                <!-- /.box-header -->
-                                <div class="box-body">
-                                    <div class="row margin">
-                                        <div class="overlay">
-                                            <i class="fa fa-refresh fa-spin"></i>
-                                        </div>
-
-                                        <br>
-                                    </div>
-                                </div>
-                                <!-- /.box-body -->
-                            </div>
-                            <div id="user-profile-summary-container" class="box box-primary">
-                            </div>
-                            <div id="restaurant-filter-container" class="box box-primary">
-                            </div>
+                <div class="navbar-header">
+                    <a href="./" class="navbar-brand"><b>Order</b>Express</a>
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#navbar-collapse">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#"> Join us <span class="sr-only">(current)</span></a></li>
+                        <li class="dropdown">
+                            <a href="" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span
+                                    class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">One more separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="navbar-search-input" placeholder="Search">
                         </div>
-                        <div id="home-right-panel" class="col-xs-8">
-                            <div id="right-panel-loading-box" class="box box-primary">
-                                <div class="box-header">
-                                    <h3 class="box-title">Loading ...</h3>
-                                </div>
-                                <!-- /.box-header -->
-                                <div class="box-body">
-                                    <div class="row margin">
-                                        <div class="overlay">
-                                            <i class="fa fa-refresh fa-spin"></i>
-                                        </div>
-
-                                        <br>
+                    </form>
+                </div>
+                <!-- /.navbar-collapse -->
+                <!-- Navbar Right Menu -->
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- Messages: style can be found in dropdown.less-->
+                        <!-- Notifications Menu -->
+                        <li class="dropdown notifications-menu">
+                            <!-- Menu toggle button -->
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell-o"></i>
+                                <span class="label label-warning">10</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have 10 notifications</li>
+                                <li>
+                                    <!-- Inner Menu: contains the notifications -->
+                                    <div class="slimScrollDiv"
+                                         style="position: relative; overflow: hidden; width: auto; height: 200px;">
+                                        <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
+                                            <li>
+                                                <!-- start notification -->
+                                                <a href="#">
+                                                    <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                                                </a>
+                                            </li>
+                                            <!-- end notification -->
+                                        </ul>
+                                        <div class="slimScrollBar"
+                                             style="background: rgb(0, 0, 0); width: 3px; position: absolute; top: 0px; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px;"></div>
+                                        <div class="slimScrollRail"
+                                             style="width: 3px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
                                     </div>
+                                </li>
+                                <li class="footer"><a href="#">View all</a></li>
+                            </ul>
+                        </li>
+                        <!-- Control Sidebar Toggle Button -->
+                        <li>
+                            <a href="#" data-toggle="control-sidebar"><i class="fa fa-shopping-cart"
+                                                                         aria-hidden="true"></i><span
+                                    class="label label-danger">9</span></a>
+                        </li>
+                        <!-- User Account Menu -->
+                        <li id="user-badge" class="dropdown user user-menu">
+                        </li>
+                        <li id="login-button" class="dropdown login-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="display: block;"
+                               aria-expanded="false">Sign In</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-custom-menu -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+    </header>
+    <!-- Full Width Column -->
+    <div class="content-wrapper" style="min-height: 679px;">
+        <div class="container">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <h1>
+                    Pick a Restaurant
+                    <small>And we deliver your favorite food!</small>
+                </h1>
+            </section>
+            <!-- Main content -->
+            <section class="content">
+                <div id="restaurant-filter" class="row">
+                    <div id="home-left-panel" class="col-xs-4">
+                        <div id="left-panel-loading-box" class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Loading ...</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <div class="row margin">
+                                    <div class="overlay">
+                                        <i class="fa fa-refresh fa-spin"></i>
+                                    </div>
+                                    <br>
                                 </div>
-                                <!-- /.box-body -->
                             </div>
-                            <div id="restaurant-search-result-container" class="box box-info">
-                            </div>
-                            <div id="user-transaction-container" class="box box-info">
-                            </div>
-                            <div id="user-profile-container" class="box box-info">
-                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <div id="user-profile-summary-container" class="box box-primary">
+                        </div>
+                        <div id="restaurant-filter-container" class="box box-primary">
                         </div>
                     </div>
-                </section>
-                <!-- /.content -->
-            </div>
-            <!-- /.container -->
+                    <div id="home-right-panel" class="col-xs-8">
+                        <div id="right-panel-loading-box" class="box box-info">
+                            <div class="box-header">
+                                <h3 class="box-title">Loading ...</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <div class="row margin">
+                                    <div class="overlay">
+                                        <i class="fa fa-refresh fa-spin"></i>
+                                    </div>
+
+                                    <br>
+                                </div>
+                            </div>
+                            <!-- /.box-body -->
+                        </div>
+                        <div id="restaurant-search-result-container" class="box box-info">
+                        </div>
+                        <div id="user-transaction-container" class="box box-info">
+                        </div>
+                        <div id="user-profile-container" class="box box-info">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
         </div>
-        <!-- /.content-wrapper -->
-        <footer class="main-footer">
-            <div class="container">
-                <div class="pull-right hidden-xs">
-                    <b>Version</b> 2.3.7
-                </div>
-                <strong>Copyright © 2014-2016 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights
-                reserved.
+        <!-- /.container -->
+    </div>
+    <!-- /.content-wrapper -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> 2.3.7
             </div>
-            <!-- /.container -->
-        </footer>
-        <!-- The Right Sidebar -->
-        <aside class="control-sidebar control-sidebar-light">
-            <!-- Content of the sidebar goes here -->
-        </aside>
-        <!-- The sidebar's background -->
-        <!-- This div must placed right after the sidebar for it to work-->
-        <div id="shopping-cart" class="control-sidebar-bg"></div>
+            <strong>Copyright © 2014-2016 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights
+            reserved.
+        </div>
+        <!-- /.container -->
+    </footer>
+    <!-- The Right Sidebar -->
+    <aside class="control-sidebar control-sidebar-light">
+        <!-- Content of the sidebar goes here -->
+    </aside>
+    <!-- The sidebar's background -->
+    <!-- This div must placed right after the sidebar for it to work-->
+    <div id="shopping-cart" class="control-sidebar-bg"></div>
 </div>
 <!-- ./wrapper -->
 <!-- REQUIRED JS SCRIPTS -->
